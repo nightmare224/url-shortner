@@ -3,7 +3,7 @@ class BadRequest(Exception):
     def __init__(self, message = None):
         super().__init__()
         self.payload = {
-            "error": str(message) if message else "404 Not Found."
+            "error": str(message) if message else "400 Bad Request."
         }
 
 class NotFound(Exception):
@@ -11,5 +11,5 @@ class NotFound(Exception):
     def __init__(self, message = None):
         super().__init__()
         self.payload = {
-            "error": str(message) if message else "400 Bad Request."
+            "error": str(message) if message else "404 Not Found."
         }
