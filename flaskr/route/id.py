@@ -4,17 +4,14 @@ from model.url import URL
 from schema.id import IDSchema
 from schema.url import URLSchema
 from model.error import BadRequest, NotFound
-from shortner import getShortURL
-
+# from shortner import getShortURL
 
 id_restapi = Blueprint("id_restapi", __name__)
-
 
 @id_restapi.route("/", methods=["GET"])
 def getId():
     
     id = ID(id = "123")
-
 
     # validation and serialization
     try:
@@ -22,8 +19,6 @@ def getId():
     except:
         raise BadRequest("Invalid payload.")
     return payload, 200
-
-
 
 @id_restapi.route("/", methods=["POST"])
 def createId():
@@ -34,7 +29,8 @@ def createId():
     except:
         raise BadRequest("Invalid URL")
 
-    id = getShortURL(url.url)
+    # id = getShortURL(url.url)
+    id = "123"
     if not id:
         raise BadRequest("Invalid URL")
 
