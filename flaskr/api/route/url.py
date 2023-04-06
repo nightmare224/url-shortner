@@ -3,14 +3,14 @@ from model.url import URL
 from model.error import BadRequest, NotFound
 from schema.url import URLSchema
 from marshmallow import ValidationError
-
-from shortner import getFullUrlFromShortUrl, createShortURL, deleteShortUrl
+from shortner import query_full_url, delete_short_url
+# from shortner import update_full_url
 
 url_restapi = Blueprint("url_restapi", __name__)
 
 
 @url_restapi.route("/<short_url_id>", methods=["GET"])
-def getUrl(short_url_id):
+def get_url(short_url_id):
     """
     Get the full URL through short URL ID.
     ---
@@ -28,7 +28,7 @@ def getUrl(short_url_id):
             schema:
                 $ref: '#/definitions/URL'
     """
-    url = URL(url=getFullUrlFromShortUrl(short_url_id))
+    url = URL(url=query_full_url(short_url_id))
     try:
         payload = URLSchema().dump(url)
     except ValidationError:
@@ -37,8 +37,8 @@ def getUrl(short_url_id):
         return payload, 301
 
 
-@url_restapi.route("/create", methods=["PUT"])
-def updateUrlFromId():
+@url_restapi.route("/<short_url_id>", methods=["PUT"])
+def update_url(short_url_id):
     """
     Update the mapping of short URL ID and full URL.
     ---
@@ -63,19 +63,21 @@ def updateUrlFromId():
             description: Short URL ID not found.
     """
     try:
-        full_url = request.json["full_url"]
-        print(full_url)
-        resp = createShortURL(full_url)
+        request_data = request.get_json()
+        url = URLSchema().load(request_data)
+        # result = update_full_url(short_url_id, url.url)
+        result = None
     except ValidationError:
         raise BadRequest("Invalid payload.")
-    except:
+    except KeyError:
         raise NotFound("Invalid ID.")
     else:
-        return resp, 200
+        payload = {"deleted": "true", "id": result}
+        return jsonify(payload), 200
 
 
 @url_restapi.route("/<short_url_id>", methods=["DELETE"])
-def deleteUrlFromId(short_url_id):
+def delete_url(short_url_id):
     """
     Delete the mapping of short URL ID and full URL.
     ---
@@ -94,8 +96,8 @@ def deleteUrlFromId(short_url_id):
             description: Short URL ID not found.
     """
     try:
-        result = deleteShortUrl(short_url_id)
-    except:
+        result = delete_short_url(short_url_id)
+    except KeyError:
         raise NotFound("Invalid ID.")
     else:
         payload = {"deleted": "true", "id": result}

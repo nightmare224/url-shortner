@@ -1,5 +1,5 @@
 from dataclasses import dataclass
 
 @dataclass
-class URL():
+class URL:
     url: str
