@@ -4,12 +4,12 @@ from sqlalchemy.sql import func
 from dbmodel import db, url_mapper, url_mapper_schema
 
 
-def createShortURL(fullUrl):
+def create_short_url(full_url) -> dict:
     """
     Function to create a new record in database for any new URL
 
     parameters:
-        fullUrl: complete url including http or https as well
+        full_url: complete url including http or https as well
 
     returns:
         json response with following details:
@@ -17,84 +17,82 @@ def createShortURL(fullUrl):
         short_url_id : new generated short url [without domain]
         short_base_url : Base url [domain name] for short url
         full_url : full url which was passed as input
-
     """
-    if isFullUrlNotFound(fullUrl):
-        baseUrlForShortUrl = "https://snv.io"
-        nextUniqueId = getNextuniqueId()
-        short_url_id = generateShortId(nextUniqueId)
-        newUrl = url_mapper(
-            url_id=nextUniqueId,
+    if is_full_url_not_found(full_url):
+        BASE_URL_FOR_SHORT_URL = "https://snv.io"
+        next_unique_id = query_next_unique_id()
+        short_url_id = base62_encode(url_id=next_unique_id)
+        new_url = url_mapper(
+            url_id=next_unique_id,
             short_url_id=short_url_id,
-            short_base_url=baseUrlForShortUrl,
-            full_url=fullUrl,
+            short_base_url=BASE_URL_FOR_SHORT_URL,
+            full_url=full_url,
         )
-        db.session.add(newUrl)
+        db.session.add(new_url)
         db.session.commit()
-        return url_mapper_schema.jsonify(newUrl)
+        return url_mapper_schema.dump(new_url)
     else:
-        result = getUrlMappingForFullUrl(fullUrl)
-        return jsonify(result)
+        result = query_url_mapping(full_url)
+        return result
 
 
-def getFullUrlFromShortUrl(ShortUrlId):
+def delete_short_url(short_url_id) -> str:
+    """
+    To delete the mapping of short url
+    parameter:
+        short_url_id : short ur id which is without the domain name [base url]
+    returns:
+        short url id
+    """
+    url_id = base62_decode(short_url_id=short_url_id)
+    to_delete = url_mapper.query.get(url_id)
+    db.session.delete(to_delete)
+    db.session.commit()
+    return short_url_id
+
+def query_full_url(short_url_id) -> str:
     """
     To get the full URL from provided short url
     parameter:
-        ShortUrlId : short ur id which is without the domain name [base url]
+        short_url_id : short ur id which is without the domain name [base url]
     returns:
         full url with http protocol as well.
     """
-    UrlId = getShortUrlIdToUrlId(ShortUrlId)
-    urlMap = url_mapper.query.get(UrlId)
-    if urlMap is not None:
-        result = url_mapper_schema.dump(urlMap)
+    url_id = base62_decode(short_url_id=short_url_id)
+    url_map = url_mapper.query.get(url_id)
+    if url_map is not None:
+        result = url_mapper_schema.dump(url_map)
         baseUrl = result["short_base_url"]
         short_url_id = result["short_url_id"]
         short_url = baseUrl + "/" + short_url_id
         return short_url
 
 
-def deleteShortUrl(ShortUrlId):
-    """
-    To delete the mapping of short url
-    parameter:
-        ShortUrlId : short ur id which is without the domain name [base url]
-    returns:
-        short url id
-    """
-    UrlId = getShortUrlIdToUrlId(ShortUrlId)
-    toDelete = url_mapper.query.get(UrlId)
-    db.session.delete(toDelete)
-    db.session.commit()
-    return ShortUrlId
-
-
-def generateShortId(UrlId):
+def base62_encode(url_id) -> str:
     BASE_62_VALUES = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    shortUrlId = ""
+    short_url_id = ""
     base = 62
-    while UrlId > 0:
-        r = UrlId % base
-        shortUrlId += BASE_62_VALUES[r]
-        UrlId //= base
-    return shortUrlId[len(shortUrlId) :: -1]
+    while url_id > 0:
+        r = url_id % base
+        short_url_id += BASE_62_VALUES[r]
+        url_id //= base
+    return short_url_id[len(short_url_id) :: -1]
 
 
-def getShortUrlIdToUrlId(ShortUrlId):
-    UrlId = 0
-    for letter in ShortUrlId:
+def base62_decode(short_url_id) -> int:
+    url_id = 0
+    for letter in short_url_id:
         letter_val = ord(letter)
         if letter_val >= ord("a") and letter_val <= ord("z"):
-            UrlId = UrlId * 62 + letter_val - ord("a")
+            url_id = url_id * 62 + letter_val - ord("a")
         elif letter_val >= ord("A") and letter_val <= ord("Z"):
-            UrlId = UrlId * 62 + letter_val - ord("A") + 26
+            url_id = url_id * 62 + letter_val - ord("A") + 26
         else:
-            UrlId = UrlId * 62 + letter_val - ord("0") + 52
-    return UrlId
+            url_id = url_id * 62 + letter_val - ord("0") + 52
+    return url_id
 
 
-def isFullUrlNotFound(full_url):
+def is_full_url_not_found(full_url) -> bool:
     found = False
     count = (
         db.session.query(func.count(url_mapper.url_id))
@@ -106,15 +104,22 @@ def isFullUrlNotFound(full_url):
     return found
 
 
-def getUrlMappingForFullUrl(full_url):
-    UrlId = db.session.query("*").filter(url_mapper.full_url == full_url).scalar()
-    print(UrlId)
-    urlMap = url_mapper.query.get(UrlId)
-    result = url_mapper_schema.dump(urlMap)
+def query_url_mapping(full_url=None):
+    if full_url:
+        url_id = db.session.query("*").filter(url_mapper.full_url == full_url).scalar()
+        url_map = url_mapper.query.get(url_id)
+        result = url_mapper_schema.dump(url_map)
+    else:
+        #return all if not specify full_url
+        result = []
+        url_id_list = db.session.query(url_mapper.url_id).all()
+        for url_id in url_id_list:
+            url_map = url_mapper.query.get(url_id)
+            result.append(url_mapper_schema.dump(url_map))
+
     return result
 
 
-def getNextuniqueId():
+def query_next_unique_id() -> int:
     id = db.session.query(func.max(url_mapper.url_id)).scalar()
-    print(id)
     return id + 1
