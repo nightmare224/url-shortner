@@ -10,11 +10,22 @@ Then get inside flaskr dir
 ```
 cd flaskr
 ```
-Now export the flask app
+## How to spin-up docker compose
+
+run the following command, api and database should be able to spin-up
+
 ```
-export FLASK_APP=api
+docker-compose up --build --force-recreate
 ```
-Then
+
+After successful, you should be able to connect to postgres db
+
 ```
-flask run
+host: 127.0.0.1
+port: 5432
+user: postgresadmin
+password: admin123
+
 ```
+
+Also you should be able to make api calls on your localhost

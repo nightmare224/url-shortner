@@ -3,9 +3,11 @@ from model.url import URL
 from model.error import BadRequest, NotFound
 from schema.url import URLSchema
 from marshmallow import ValidationError
-# from shortner import getUrlFromId
+
+from shortner import getFullUrlFromShortUrl, createShortURL, deleteShortUrl
 
 url_restapi = Blueprint("url_restapi", __name__)
+
 
 @url_restapi.route("/<short_url_id>", methods=["GET"])
 def getUrl(short_url_id):
@@ -26,8 +28,7 @@ def getUrl(short_url_id):
             schema:
                 $ref: '#/definitions/URL'
     """
-    # url = URL(url = getUrlFromId(id))
-    url = URL(url = "https://www.youtube.com")
+    url = URL(url=getFullUrlFromShortUrl(short_url_id))
     try:
         payload = URLSchema().dump(url)
     except ValidationError:
@@ -35,8 +36,9 @@ def getUrl(short_url_id):
     else:
         return payload, 301
 
-@url_restapi.route("/<short_url_id>", methods=["PUT"])
-def updateUrlFromId(short_url_id):
+
+@url_restapi.route("/create", methods=["PUT"])
+def updateUrlFromId():
     """
     Update the mapping of short URL ID and full URL.
     ---
@@ -61,16 +63,16 @@ def updateUrlFromId(short_url_id):
             description: Short URL ID not found.
     """
     try:
-        url = request.get_json()
-        URLSchema().load(url)
-        # call function of shortner.py
+        full_url = request.json["full_url"]
+        print(full_url)
+        resp = createShortURL(full_url)
     except ValidationError:
         raise BadRequest("Invalid payload.")
     except:
         raise NotFound("Invalid ID.")
     else:
-        payload = {"updated": "true"}
-        return jsonify(payload), 200
+        return resp, 200
+
 
 @url_restapi.route("/<short_url_id>", methods=["DELETE"])
 def deleteUrlFromId(short_url_id):
@@ -92,10 +94,9 @@ def deleteUrlFromId(short_url_id):
             description: Short URL ID not found.
     """
     try:
-        pass
-        # call function of shortner.py
+        result = deleteShortUrl(short_url_id)
     except:
         raise NotFound("Invalid ID.")
     else:
-        payload = {"deleted": "true"}
+        payload = {"deleted": "true", "id": result}
         return jsonify(payload), 204

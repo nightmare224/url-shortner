@@ -4,7 +4,7 @@ from model.url import URL
 from schema.shorturl import ShortURLSchema
 from schema.url import URLSchema
 from model.error import BadRequest, NotFound
-# from shortner import getShortURL
+from shortner import getShortUrlIdToUrlId
 
 shorturl_restapi = Blueprint("shorturl_restapi", __name__)
 
@@ -25,7 +25,7 @@ def getId():
                 items:
                     $ref: '#/definitions/ShortURL'
     """
-    shorturl = ShortURL(short_url_id = "15", short_url = "https://shortenurl.group12/15")
+    shorturl = ShortURL(short_url_id="15", short_url="https://shortenurl.group12/15")
 
     # validation and serialization
     try:
@@ -33,6 +33,7 @@ def getId():
     except:
         raise BadRequest("Invalid payload.")
     return payload, 200
+
 
 @shorturl_restapi.route("/", methods=["POST"])
 def createId():
@@ -61,11 +62,10 @@ def createId():
     except:
         raise BadRequest("Invalid URL")
 
-    # id = getShortURL(url.url)
-    shorturl = ShortURL(short_url_id = "15", short_url = "https://shortenurl.group12/15")
+    id = getShortUrlIdToUrlId(url.url)
+    shorturl = ShortURL(short_url_id="15", short_url="https://shortenurl.group12/15")
     if not shorturl:
         raise BadRequest("Invalid URL")
-
 
     # validation and serialization
     try:
@@ -73,6 +73,7 @@ def createId():
     except:
         raise BadRequest("Invalid payload.")
     return payload, 201
+
 
 @shorturl_restapi.route("/", methods=["DELETE"])
 def deleteId():

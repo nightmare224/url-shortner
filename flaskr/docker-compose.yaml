@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  urls:
+    container_name: urls
+    build: ./db
+    environment:
+       POSTGRES_DB: postgres
+       POSTGRES_USER: postgresadmin
+       POSTGRES_PASSWORD: admin123
+    ports:
+      - 5432:5432
+    restart: always
+
+
+  api-service:
+    container_name: api-service
+    build: ./api
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://postgresadmin:admin123@urls:5432/postgres
+      SQLALCHEMY_TRACK_MODIFICATIONS: 'false'
+    ports:
+      - "5000:5000"
+    depends_on:
+      - urls

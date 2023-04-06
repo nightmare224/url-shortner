@@ -1,6 +1,7 @@
 from marshmallow import Schema, fields, post_load
 from model.shorturl import ShortURL
 
+
 class ShortURLSchema(Schema):
     short_url_id = fields.String()
     short_url = fields.String()
