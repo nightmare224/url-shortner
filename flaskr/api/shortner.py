@@ -18,22 +18,18 @@ def create_short_url(full_url) -> dict:
         short_base_url : Base url [domain name] for short url
         full_url : full url which was passed as input
     """
-    if is_full_url_not_found(full_url):
-        BASE_URL_FOR_SHORT_URL = "https://snv.io"
-        next_unique_id = query_next_unique_id()
-        short_url_id = base62_encode(url_id=next_unique_id)
-        new_url = url_mapper(
-            url_id=next_unique_id,
-            short_url_id=short_url_id,
-            short_base_url=BASE_URL_FOR_SHORT_URL,
-            full_url=full_url,
-        )
-        db.session.add(new_url)
-        db.session.commit()
-        return url_mapper_schema.dump(new_url)
-    else:
-        result = query_url_mapping(full_url)
-        return result
+    BASE_URL_FOR_SHORT_URL = "https://snv.io"
+    next_unique_id = query_next_unique_id()
+    short_url_id = base62_encode(url_id=next_unique_id)
+    new_url = url_mapper(
+        url_id=next_unique_id,
+        short_url_id=short_url_id,
+        short_base_url=BASE_URL_FOR_SHORT_URL,
+        full_url=full_url,
+    )
+    db.session.add(new_url)
+    db.session.commit()
+    return url_mapper_schema.dump(new_url)
 
 
 def delete_short_url(short_url_id) -> str:

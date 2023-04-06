@@ -1,16 +1,15 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from model.shorturl import ShortURL
-from model.url import URL
 from schema.shorturl import ShortURLSchema
 from schema.url import URLSchema
-from model.error import BadRequest, NotFound
-from shortner import query_url_mapping, create_short_url
+from model.error import BadRequest, NotFound, InternalServer
+from shortner import query_url_mapping, create_short_url, is_full_url_not_found
 
 shorturl_restapi = Blueprint("shorturl_restapi", __name__)
 
 
 @shorturl_restapi.route("/", methods=["GET"])
-def get_short_url():
+def get_short_url_api():
     """
     Get all shorten URL.
     ---
@@ -35,13 +34,13 @@ def get_short_url():
         try:
             payload.append(ShortURLSchema().dump(data))
         except:
-            raise Exception
+            raise InternalServer("The data from database mismatch API schema.")
 
     return payload, 200
 
 
 @shorturl_restapi.route("/", methods=["POST"])
-def create_id():
+def create_short_url_api():
     """
     Create shorten URL by passing URL in payload.
     ---
@@ -67,24 +66,26 @@ def create_id():
     except:
         raise BadRequest("Invalid URL")
 
-    # print(create_short_url("ww3"))
-    # create_short_url(url.url)
+    # the mapping of full url to short url already existed
+    if not is_full_url_not_found(url.url):
+        raise BadRequest("The URL already has short URL.")
 
-    # id = base62_decode(url.url)
-    shorturl = ShortURL(short_url_id="15", short_url="https://shortenurl.group12/15")
-    if not shorturl:
-        raise BadRequest("Invalid URL")
 
-    # validation and serialization
+    url_mapping = create_short_url(url.url)
+    data = ShortURL(
+        short_url_id=url_mapping["short_url_id"], 
+        short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}"
+    )
     try:
-        payload = ShortURLSchema().dump(shorturl)
+        payload = ShortURLSchema().dump(data)
     except:
-        raise BadRequest("Invalid payload.")
+        raise InternalServer("The data from database mismatch API schema.")
+    
     return payload, 201
 
 
 @shorturl_restapi.route("/", methods=["DELETE"])
-def delete_id():
+def delete_short_url_api():
     """
     Delete URL (no such method).
     ---
