@@ -5,8 +5,6 @@ COPY . /app
 # defining env vars
 ENV FLASK_APP=app.py
 # watch app' files
-ENV FLASK_DEBUG=true
-ENV FLASK_ENV=development
 
 RUN apk update
 RUN apk add py-pip
@@ -15,5 +13,5 @@ RUN pip install --upgrade pip
 
 RUN pip --no-cache-dir install -r requirements.txt
 
-EXPOSE 5000
+EXPOSE ${API_PORT}
 CMD ["python", "app.py"]
