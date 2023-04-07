@@ -3,8 +3,8 @@ from model.url import URL
 from model.error import BadRequest, NotFound
 from schema.url import URLSchema
 from marshmallow import ValidationError
-from shortner import query_full_url, delete_short_url
-# from shortner import update_full_url
+from shortner import query_full_url, update_full_url, delete_short_url
+from sqlalchemy.orm.exc import UnmappedInstanceError
 
 url_restapi = Blueprint("url_restapi", __name__)
 
@@ -18,9 +18,10 @@ def get_url(short_url_id):
       - Full URL APIs
     parameters:
       - in: path
-        name: Short URL ID
+        name: short_url_id
         type: string
         required: true
+        description: The result of Base 62 encode of URL ID
     description: Get all shorten URL.
     responses:
         301:
@@ -29,12 +30,10 @@ def get_url(short_url_id):
                 $ref: '#/definitions/URL'
     """
     url = URL(url=query_full_url(short_url_id))
-    try:
-        payload = URLSchema().dump(url)
-    except ValidationError:
-        raise BadRequest("Invalid payload.")
-    else:
-        return payload, 301
+    if url.url is None:
+        raise NotFound("Invalid ID.")
+    payload = URLSchema().dump(url)
+    return payload, 301
 
 
 @url_restapi.route("/<short_url_id>", methods=["PUT"])
@@ -46,9 +45,10 @@ def update_url(short_url_id):
       - Full URL APIs
     parameters:
       - in: path
-        name: Short URL ID
+        name: short_url_id
         type: string
         required: true
+        description: The result of Base 62 encode of URL ID
       - name: URL
         in: body
         schema:
@@ -65,14 +65,15 @@ def update_url(short_url_id):
     try:
         request_data = request.get_json()
         url = URLSchema().load(request_data)
-        # result = update_full_url(short_url_id, url.url)
-        result = None
+        print(type(short_url_id), short_url_id, url.url)
+        result = update_full_url(short_url_id, url.url)
+        # result = None
     except ValidationError:
         raise BadRequest("Invalid payload.")
-    except KeyError:
+    except UnmappedInstanceError:
         raise NotFound("Invalid ID.")
     else:
-        payload = {"deleted": "true", "id": result}
+        payload = {"updated": "true", "id": result}
         return jsonify(payload), 200
 
 
@@ -85,9 +86,10 @@ def delete_url(short_url_id):
       - Full URL APIs
     parameters:
       - in: path
-        name: Short URL ID
+        name: short_url_id
         type: string
         required: true
+        description: The result of Base 62 encode of URL ID
     description: Get all shorten URL.
     responses:
         204:
@@ -96,9 +98,8 @@ def delete_url(short_url_id):
             description: Short URL ID not found.
     """
     try:
-        result = delete_short_url(short_url_id)
-    except KeyError:
+        delete_short_url(short_url_id)
+    except UnmappedInstanceError:
         raise NotFound("Invalid ID.")
     else:
-        payload = {"deleted": "true", "id": result}
-        return jsonify(payload), 204
+        return jsonify({}), 204
