@@ -110,24 +110,11 @@ def query_url_mapping(full_url=None):
         result = url_mapper_schema.dump(url_map)
     else:
         # return all if not specify full_url
-        # result = []
-        try:
-            urls_list = url_mapper.query.all()
-            result = urls_list
-        # for url in urls_list:
-        # app.logger.info(url)
-        # short_url = get_short_url(url)
-        # print(short_url)
-        # short_url_id = (url["short_url_id"],)
-        # full_url = (url["full_url"],)
-        # payload = {
-        #     "short_url_id": short_url_id,
-        #     "short_url": short_url,
-        #     "full_url": full_url,
-        # }
-        # result.append(payload)
-        except:
-            traceback.print_exc()
+        result = []
+        url_id_list = db.session.query(url_mapper.url_id).all()
+        for url_id in url_id_list:
+            url_map = url_mapper.query.get(url_id)
+            result.append(url_mapper_schema.dump(url_map))
     return result
 
 
