@@ -28,8 +28,8 @@ def get_short_url_api():
     url_mapping_all = query_url_mapping()
     for url_mapping in url_mapping_all:
         data = ShortURL(
-            short_url_id=url_mapping["short_url_id"], 
-            short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}"
+            short_url_id=url_mapping["short_url_id"],
+            short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
         )
         try:
             payload.append(ShortURLSchema().dump(data))
@@ -70,17 +70,16 @@ def create_short_url_api():
     if not is_full_url_not_found(url.url):
         raise BadRequest("The URL already has short URL.")
 
-
     url_mapping = create_short_url(url.url)
     data = ShortURL(
-        short_url_id=url_mapping["short_url_id"], 
-        short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}"
+        short_url_id=url_mapping["short_url_id"],
+        short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
     )
     try:
         payload = ShortURLSchema().dump(data)
     except:
         raise InternalServer("The data from database mismatch API schema.")
-    
+
     return payload, 201
 
 

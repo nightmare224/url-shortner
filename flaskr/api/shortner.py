@@ -2,6 +2,8 @@ from flask import jsonify
 from sqlalchemy.sql import func
 from dbmodel import db, url_mapper, url_mapper_schema
 from sqlalchemy.orm.exc import UnmappedInstanceError
+import os
+import traceback
 
 
 def create_short_url(full_url) -> dict:
@@ -18,13 +20,13 @@ def create_short_url(full_url) -> dict:
         short_base_url : Base url [domain name] for short url
         full_url : full url which was passed as input
     """
-    BASE_URL_FOR_SHORT_URL = "https://snv.io"
+    short_base_url = os.environ.get("BASE_URL_FOR_SHORT_URL")
     next_unique_id = query_next_unique_id()
     short_url_id = base62_encode(url_id=next_unique_id)
     new_url = url_mapper(
         url_id=next_unique_id,
         short_url_id=short_url_id,
-        short_base_url=BASE_URL_FOR_SHORT_URL,
+        short_base_url=short_base_url,
         full_url=full_url,
     )
     db.session.add(new_url)
@@ -46,6 +48,7 @@ def delete_short_url(short_url_id) -> str:
     db.session.commit()
     return short_url_id
 
+
 def query_full_url(short_url_id) -> str:
     """
     To get the full URL from provided short url
@@ -58,19 +61,19 @@ def query_full_url(short_url_id) -> str:
     url_map = url_mapper.query.get(url_id)
     if url_map is not None:
         result = url_mapper_schema.dump(url_map)
-        baseUrl = result["short_base_url"]
-        short_url_id = result["short_url_id"]
-        short_url = baseUrl + "/" + short_url_id
-        return short_url
+        short_url = get_short_url(result)
+        full_url = result["full_url"]
+        # TODO : return both short and full url
+        return full_url
 
 
 def base62_encode(url_id) -> str:
-    BASE_62_VALUES = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    base62_values = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     short_url_id = ""
     base = 62
     while url_id > 0:
         r = url_id % base
-        short_url_id += BASE_62_VALUES[r]
+        short_url_id += base62_values[r]
         url_id //= base
     return short_url_id[len(short_url_id) :: -1]
 
@@ -106,13 +109,12 @@ def query_url_mapping(full_url=None):
         url_map = url_mapper.query.get(url_id)
         result = url_mapper_schema.dump(url_map)
     else:
-        #return all if not specify full_url
+        # return all if not specify full_url
         result = []
         url_id_list = db.session.query(url_mapper.url_id).all()
         for url_id in url_id_list:
             url_map = url_mapper.query.get(url_id)
             result.append(url_mapper_schema.dump(url_map))
-
     return result
 
 
@@ -125,6 +127,20 @@ def update_full_url(short_url_id, full_url):
     url_map = url_mapper.query.filter_by(short_url_id=short_url_id).first()
     if url_map is None:
         raise UnmappedInstanceError(f"No row found with short_url_id={short_url_id}")
-    url_map.full_url=full_url
+    url_map.full_url = full_url
     db.session.commit()
     return short_url_id
+
+
+def get_short_url(url_mapper_dump) -> str:
+    baseUrl = url_mapper_dump["short_base_url"]
+    baseUrl = clean_base_url(baseUrl)
+    short_url_id = url_mapper_dump["short_url_id"]
+    short_url = baseUrl + "/" + short_url_id
+    return short_url
+
+
+def clean_base_url(base_url) -> str:
+    base_url.strip("/")
+    base_url.strip(".")
+    return base_url
