@@ -1,10 +1,12 @@
 from flask import Blueprint, jsonify, request
 from model.url import URL
+from model.shorturl import ShortURL
 from model.error import BadRequest, NotFound
 from schema.url import URLSchema
+from schema.shorturl import ShortURLSchema
 from marshmallow import ValidationError
 from shortner import (
-    query_full_url,
+    query_url_mapping,
     update_full_url,
     delete_short_url,
     is_full_url_not_found,
@@ -34,10 +36,18 @@ def get_url(short_url_id):
             schema:
                 $ref: '#/definitions/URL'
     """
-    url = URL(url=query_full_url(short_url_id))
-    if url.url is None:
-        raise NotFound("Invalid ID.")
+    try:
+        url_mapping = query_url_mapping(short_url_id = short_url_id)
+    except:
+        raise NotFound("Short URL ID not found.")
+    url = URL(url=url_mapping["full_url"])
+    short_url = ShortURL(
+        short_url_id=url_mapping["short_url_id"],
+        short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+    )
+
     payload = URLSchema().dump(url)
+    payload.update(ShortURLSchema().dump(short_url))
     return payload, 301
 
 
