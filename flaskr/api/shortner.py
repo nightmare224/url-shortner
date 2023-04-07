@@ -4,7 +4,7 @@ from dbmodel import db, url_mapper, url_mapper_schema
 from sqlalchemy.orm.exc import UnmappedInstanceError
 import os
 import traceback
-
+from model.error import InternalServer
 
 def create_short_url(full_url) -> dict:
     """
@@ -49,22 +49,22 @@ def delete_short_url(short_url_id) -> str:
     return short_url_id
 
 
-def query_full_url(short_url_id) -> str:
-    """
-    To get the full URL from provided short url
-    parameter:
-        short_url_id : short ur id which is without the domain name [base url]
-    returns:
-        full url with http protocol as well.
-    """
-    url_id = base62_decode(short_url_id=short_url_id)
-    url_map = url_mapper.query.get(url_id)
-    if url_map is not None:
-        result = url_mapper_schema.dump(url_map)
-        short_url = get_short_url(result)
-        full_url = result["full_url"]
-        # TODO : return both short and full url
-        return full_url
+# def query_full_url(short_url_id) -> str:
+#     """
+#     To get the full URL from provided short url
+#     parameter:
+#         short_url_id : short ur id which is without the domain name [base url]
+#     returns:
+#         full url with http protocol as well.
+#     """
+#     url_id = base62_decode(short_url_id=short_url_id)
+#     url_map = url_mapper.query.get(url_id)
+#     if url_map is not None:
+#         result = url_mapper_schema.dump(url_map)
+#         short_url = get_short_url(result)
+#         full_url = result["full_url"]
+#         # TODO : return both short and full url
+#         return full_url
 
 
 def base62_encode(url_id) -> str:
@@ -103,18 +103,44 @@ def is_full_url_not_found(full_url) -> bool:
     return found
 
 
-def query_url_mapping(full_url=None):
-    if full_url:
-        url_id = db.session.query("*").filter(url_mapper.full_url == full_url).scalar()
+# def query_url_mapping(full_url=None):
+#     if full_url:
+#         url_id = db.session.query("*").filter(url_mapper.full_url == full_url).scalar()
+#         url_map = url_mapper.query.get(url_id)
+#         result = url_mapper_schema.dump(url_map)
+#     else:
+#         # return all if not specify full_url
+#         result = []
+#         url_id_list = db.session.query(url_mapper.url_id).all()
+#         for url_id in url_id_list:
+#             url_map = url_mapper.query.get(url_id)
+#             result.append(url_mapper_schema.dump(url_map))
+#     return result
+
+def query_url_mapping(*args, short_url_id = None, full_url = None):
+    url_id = None
+    if args:
+        raise InternalServer("Provide short_url_id or full_url to get url_mapping")
+    elif short_url_id:
+        url_id = db.session.query(url_mapper.url_id).filter(url_mapper.short_url_id == short_url_id).scalar()
+        if url_id is None:
+            raise InternalServer("short_url_id not found in database.")
+    elif full_url:
+        url_id = db.session.query(url_mapper.url_id).filter(url_mapper.full_url == full_url).scalar()
+        if url_id is None:
+            raise InternalServer("short_url_id not found in database.")
+        
+    if url_id:
         url_map = url_mapper.query.get(url_id)
         result = url_mapper_schema.dump(url_map)
+    # get all result if not provide variable
     else:
-        # return all if not specify full_url
         result = []
         url_id_list = db.session.query(url_mapper.url_id).all()
         for url_id in url_id_list:
             url_map = url_mapper.query.get(url_id)
             result.append(url_mapper_schema.dump(url_map))
+
     return result
 
 
