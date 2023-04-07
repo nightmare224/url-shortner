@@ -14,4 +14,4 @@ RUN pip install --upgrade pip
 RUN pip --no-cache-dir install -r requirements.txt
 
 EXPOSE ${API_PORT}
-CMD ["python", "app.py"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "app:app"]

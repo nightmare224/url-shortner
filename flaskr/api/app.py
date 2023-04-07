@@ -37,10 +37,3 @@ swagger = Swagger(app, template=template)
 app.register_blueprint(url_restapi)
 app.register_blueprint(shorturl_restapi)
 app.register_blueprint(error_controller)
-
-if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0", 
-        port=os.environ.get("API_PORT"), 
-        debug=os.environ.get("API_DEBUG")
-    )
