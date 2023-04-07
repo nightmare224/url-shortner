@@ -3,7 +3,12 @@ from model.url import URL
 from model.error import BadRequest, NotFound
 from schema.url import URLSchema
 from marshmallow import ValidationError
-from shortner import query_full_url, update_full_url, delete_short_url
+from shortner import (
+    query_full_url,
+    update_full_url,
+    delete_short_url,
+    is_full_url_not_found,
+)
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
 url_restapi = Blueprint("url_restapi", __name__)
@@ -65,9 +70,11 @@ def update_url(short_url_id):
     try:
         request_data = request.get_json()
         url = URLSchema().load(request_data)
-        print(type(short_url_id), short_url_id, url.url)
+        # the mapping of full url to short url already existed
+        if not is_full_url_not_found(url.url):
+            raise BadRequest("The URL already has short URL.")
         result = update_full_url(short_url_id, url.url)
-        # result = None
+
     except ValidationError:
         raise BadRequest("Invalid payload.")
     except UnmappedInstanceError:

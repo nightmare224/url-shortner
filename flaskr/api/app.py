@@ -15,7 +15,6 @@ app = Flask(__name__, instance_relative_config=True)
 
 app.config.from_mapping(
     SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DATABASE_URI"),
-    # SQLALCHEMY_DATABASE_URI="postgresql://postgresadmin:admin123@127.0.0.1:5432/postgres",
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
 )
 db.app = app
