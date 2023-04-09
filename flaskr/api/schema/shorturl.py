@@ -2,7 +2,6 @@ import re
 from marshmallow import (
     Schema,
     fields,
-    pre_load,
     post_load,
     validates_schema,
     ValidationError,
@@ -16,9 +15,9 @@ class ShortURLSchema(Schema):
 
     @validates_schema
     def validate_url(self, data, **kwargs):
-        url = data["short_url"]
+        url = data["url"]
         result = re.match(
-            r"^([a-z]+)://([a-z0-9\-\.]+)(:\d+)?(/[^ \t\n\r\f\v?]*)*(\?\S*)?$", url
+            r"^([a-zA-Z]+)://([a-zA-Z0-9\-\.]+)(:\d+)?(/[^ \t\n\r\f\v?]*)*(\?\S*)?$", url
         )
         if result is None:
             raise ValidationError("Invalid URL")
@@ -29,11 +28,13 @@ class ShortURLSchema(Schema):
         query = result.group(5)
 
         # scheme
+        scheme_sanitize = scheme.lower()
         if scheme not in ["http", "https", "ftp"]:
             raise ValidationError("Invalid URL")
 
         # host
-        labels = host.split(".")
+        host_sanitize = host.lower()
+        labels = host_sanitize.split(".")
         for label in labels:
             if label:
                 # not start and end with -
@@ -60,12 +61,7 @@ class ShortURLSchema(Schema):
                 query_sanitize = query
 
         # url after sanitize
-        data["short_url"] = f"{scheme}://{host}{port_sanitize}{path_sanitize}{query_sanitize}"
-
-    @pre_load
-    def uncapital_url(self, data, **kwargs):
-        data["short_url"] = data["short_url"].lower()
-        return data
+        data["url"] = f"{scheme_sanitize}://{host_sanitize}{port_sanitize}{path_sanitize}{query_sanitize}"
 
     # deserialization
     @post_load

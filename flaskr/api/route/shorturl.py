@@ -1,7 +1,8 @@
 from flask import Blueprint, request
 from model.shorturl import ShortURL
+from model.url import FullURL, URL
 from schema.shorturl import ShortURLSchema
-from schema.url import URLSchema
+from schema.url import FullURLSchema, URLSchema
 from model.error import BadRequest, NotFound, InternalServer
 from shortner import query_url_mapping, create_short_url, is_full_url_not_found
 
@@ -15,26 +16,24 @@ def get_short_url_api():
     ---
     tags:
       - Short URL APIs
-    description: Get all shorten URL.
+    description: Get all URL information.
     responses:
         200:
-            description: Get a list of shorten URL.
+            description: Get a list of URL information.
             schema:
                 type: array
                 items:
-                    $ref: '#/definitions/ShortURL'
+                    $ref: '#/definitions/URL'
     """
     payload = []
     url_mapping_all = query_url_mapping()
     for url_mapping in url_mapping_all:
-        data = ShortURL(
+        url = URL(
             short_url_id=url_mapping["short_url_id"],
             short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+            full_url=url_mapping["full_url"]
         )
-        try:
-            payload.append(ShortURLSchema().dump(data))
-        except:
-            raise InternalServer("The data from database mismatch API schema.")
+        payload.append(URLSchema().dump(url))
 
     return payload, 200
 
@@ -42,44 +41,41 @@ def get_short_url_api():
 @shorturl_restapi.route("/", methods=["POST"])
 def create_short_url_api():
     """
-    Create shorten URL by passing URL in payload.
+    Create shorten URL by passing a full URL in the payload.
     ---
     tags:
       - Short URL APIs
-    description: Create shorten URL by passing URL in payload.
+    description: Create shorten URL by passing a full URL in the payload.
     parameters:
-      - name: URL
+      - name: FullURL
         in: body
         schema:
-            $ref: '#/definitions/URL'
+            $ref: '#/definitions/FullURL'
     responses:
         201:
             description: Create a shorten URL successed and reponse the shorted URL.
             schema:
                 $ref: '#/definitions/ShortURL'
         400:
-            description: Invalid URL.
+            description: Invalid payload.
     """
     try:
         request_data = request.get_json()
-        url = URLSchema().load(request_data)
+        full_url = FullURLSchema().load(request_data)
     except:
-        raise BadRequest("Invalid URL")
+        raise BadRequest("Invalid payload.")
 
     # the mapping of full url to short url already existed
-    if not is_full_url_not_found(url.url):
+    if not is_full_url_not_found(full_url.full_url):
         raise BadRequest("The URL already has short URL.")
 
-    url_mapping = create_short_url(url.url)
+    url_mapping = create_short_url(full_url.full_url)
     data = ShortURL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
     )
-    try:
-        payload = ShortURLSchema().dump(data)
-    except:
-        raise InternalServer("The data from database mismatch API schema.")
-
+    
+    payload = ShortURLSchema().dump(data)
     return payload, 201
 
 
@@ -93,6 +89,6 @@ def delete_short_url_api():
     description: Delete URL (no such method).
     responses:
         404:
-            description: Delete Method Not Found.
+            description: Delete method not found.
     """
-    raise NotFound("Delete Method Not Found")
+    raise NotFound("Delete method not found")

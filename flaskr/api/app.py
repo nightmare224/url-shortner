@@ -6,7 +6,7 @@ from route.url import url_restapi
 from route.shorturl import shorturl_restapi
 from route.error_controller import error_controller
 from schema.shorturl import ShortURLSchema
-from schema.url import URLSchema
+from schema.url import FullURLSchema, URLSchema
 import os
 from dbmodel import db
 
@@ -30,7 +30,7 @@ spec = APISpec(
         MarshmallowPlugin(),
     ],
 )
-template = spec.to_flasgger(app, definitions=[ShortURLSchema, URLSchema])
+template = spec.to_flasgger(app, definitions=[ShortURLSchema, FullURLSchema, URLSchema])
 swagger = Swagger(app, template=template)
 
 app.register_blueprint(url_restapi)

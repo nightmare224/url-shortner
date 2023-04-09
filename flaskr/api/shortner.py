@@ -1,9 +1,7 @@
-from flask import jsonify
+import os
 from sqlalchemy.sql import func
 from dbmodel import db, url_mapper, url_mapper_schema
 from sqlalchemy.orm.exc import UnmappedInstanceError
-import os
-import traceback
 from model.error import InternalServer
 
 def create_short_url(full_url) -> dict:
@@ -102,6 +100,16 @@ def is_full_url_not_found(full_url) -> bool:
         found = True
     return found
 
+def is_short_url_id_not_found(short_url_id) -> bool:
+    not_found = False
+    count = (
+        db.session.query(func.count(url_mapper.url_id))
+        .filter(url_mapper.short_url_id == short_url_id)
+        .scalar()
+    )
+    if count < 1:
+        not_found = True
+    return not_found
 
 # def query_url_mapping(full_url=None):
 #     if full_url:
@@ -146,7 +154,10 @@ def query_url_mapping(*args, short_url_id = None, full_url = None):
 
 def query_next_unique_id() -> int:
     id = db.session.query(func.max(url_mapper.url_id)).scalar()
-    return id + 1
+    if id is None:
+        return 1
+    else:
+        return id + 1
 
 
 def update_full_url(short_url_id, full_url):
