@@ -6,7 +6,8 @@ from marshmallow import (
     validates_schema,
     ValidationError,
 )
-from model.url import FullURL
+from model.url import FullURL, URL
+from schema.shorturl import ShortURLSchema
 
 class FullURLSchema(Schema):
     full_url = fields.String()
@@ -66,3 +67,10 @@ class FullURLSchema(Schema):
     @post_load
     def __post_load__(self, data, **kwargs):
         return FullURL(**data)
+
+class URLSchema(ShortURLSchema, FullURLSchema):
+
+    # deserialization
+    @post_load
+    def __post_load__(self, data, **kwargs):
+        return URL(**data)

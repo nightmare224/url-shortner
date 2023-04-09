@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from model.url import FullURL
+from model.url import FullURL, URL
 from model.shorturl import ShortURL
 from model.error import BadRequest, NotFound
-from schema.url import FullURLSchema
+from schema.url import FullURLSchema, URLSchema
 from schema.shorturl import ShortURLSchema
 from marshmallow import ValidationError
 from shortner import (
@@ -29,12 +29,12 @@ def get_url(short_url_id):
         type: string
         required: true
         description: The result of Base 62 encode of URL ID
-    description: Get all shorten URL.
+    description: Get the URL information of the corresponding short URL ID.
     responses:
         301:
-            description: Get the full URL.
+            description: Get the URL information of the corresponding short URL ID.
             schema:
-                $ref: '#/definitions/FullURL'
+                $ref: '#/definitions/URL'
         404:
             description: Short URL ID not found.
     """
@@ -42,14 +42,13 @@ def get_url(short_url_id):
         raise NotFound("Short URL ID not found.")
 
     url_mapping = query_url_mapping(short_url_id = short_url_id)
-    full_url = FullURL(full_url=url_mapping["full_url"])
-    short_url = ShortURL(
+    url = URL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+        full_url=url_mapping["full_url"]
     )
 
-    payload = FullURLSchema().dump(full_url)
-    payload.update(ShortURLSchema().dump(short_url))
+    payload = URLSchema().dump(url)
     return payload, 301
 
 
@@ -70,10 +69,12 @@ def update_url(short_url_id):
         in: body
         schema:
             $ref: '#/definitions/FullURL'
-    description: Get all shorten URL.
+    description: Update the mapping of short URL ID and full URL and get the update URL information.
     responses:
         200:
             description: Updated succeed.
+            schema:
+                $ref: '#/definitions/URL'
         400:
             description: Invalid payload.
         404:
@@ -101,13 +102,13 @@ def update_url(short_url_id):
 
     # query the update result
     url_mapping = query_url_mapping(full_url = full_url.full_url)
-    short_url = ShortURL(
+    url = URL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+        full_url = url_mapping["full_url"]
     )
 
-    payload = FullURLSchema().dump(full_url)
-    payload.update(ShortURLSchema().dump(short_url))
+    payload = URLSchema().dump(url)
     return jsonify(payload), 200
 
 

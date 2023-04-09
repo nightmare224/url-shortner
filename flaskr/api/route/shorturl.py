@@ -1,8 +1,8 @@
 from flask import Blueprint, request
 from model.shorturl import ShortURL
-from model.url import FullURL
+from model.url import FullURL, URL
 from schema.shorturl import ShortURLSchema
-from schema.url import FullURLSchema
+from schema.url import FullURLSchema, URLSchema
 from model.error import BadRequest, NotFound, InternalServer
 from shortner import query_url_mapping, create_short_url, is_full_url_not_found
 
@@ -16,28 +16,24 @@ def get_short_url_api():
     ---
     tags:
       - Short URL APIs
-    description: Get all shorten URL.
+    description: Get all URL information.
     responses:
         200:
-            description: Get a list of shorten URL.
+            description: Get a list of URL information.
             schema:
                 type: array
                 items:
-                    $ref: '#/definitions/ShortURL'
+                    $ref: '#/definitions/URL'
     """
     payload = []
     url_mapping_all = query_url_mapping()
     for url_mapping in url_mapping_all:
-        short_url = ShortURL(
+        url = URL(
             short_url_id=url_mapping["short_url_id"],
             short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
-        )
-        full_url = FullURL(
             full_url=url_mapping["full_url"]
         )
-        data = ShortURLSchema().dump(short_url)
-        data.update(FullURLSchema().dump(full_url))
-        payload.append(data)
+        payload.append(URLSchema().dump(url))
 
     return payload, 200
 
@@ -45,11 +41,11 @@ def get_short_url_api():
 @shorturl_restapi.route("/", methods=["POST"])
 def create_short_url_api():
     """
-    Create shorten URL by passing URL in payload.
+    Create shorten URL by passing a full URL in the payload.
     ---
     tags:
       - Short URL APIs
-    description: Create shorten URL by passing URL in payload.
+    description: Create shorten URL by passing a full URL in the payload.
     parameters:
       - name: FullURL
         in: body
@@ -93,6 +89,6 @@ def delete_short_url_api():
     description: Delete URL (no such method).
     responses:
         404:
-            description: Delete Method Not Found.
+            description: Delete method not found.
     """
-    raise NotFound("Delete Method Not Found")
+    raise NotFound("Delete method not found")
