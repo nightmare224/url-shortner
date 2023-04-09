@@ -1,8 +1,8 @@
 from flask import Blueprint, request
 from model.shorturl import ShortURL
-from model.url import URL
+from model.url import FullURL
 from schema.shorturl import ShortURLSchema
-from schema.url import URLSchema
+from schema.url import FullURLSchema
 from model.error import BadRequest, NotFound, InternalServer
 from shortner import query_url_mapping, create_short_url, is_full_url_not_found
 
@@ -32,11 +32,11 @@ def get_short_url_api():
             short_url_id=url_mapping["short_url_id"],
             short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
         )
-        url = URL(
-            url=url_mapping["full_url"]
+        full_url = FullURL(
+            full_url=url_mapping["full_url"]
         )
         data = ShortURLSchema().dump(short_url)
-        data.update(URLSchema().dump(url))
+        data.update(FullURLSchema().dump(full_url))
         payload.append(data)
 
     return payload, 200
@@ -51,10 +51,10 @@ def create_short_url_api():
       - Short URL APIs
     description: Create shorten URL by passing URL in payload.
     parameters:
-      - name: URL
+      - name: FullURL
         in: body
         schema:
-            $ref: '#/definitions/URL'
+            $ref: '#/definitions/FullURL'
     responses:
         201:
             description: Create a shorten URL successed and reponse the shorted URL.
@@ -65,15 +65,15 @@ def create_short_url_api():
     """
     try:
         request_data = request.get_json()
-        url = URLSchema().load(request_data)
+        full_url = FullURLSchema().load(request_data)
     except:
         raise BadRequest("Invalid payload.")
 
     # the mapping of full url to short url already existed
-    if not is_full_url_not_found(url.url):
+    if not is_full_url_not_found(full_url.full_url):
         raise BadRequest("The URL already has short URL.")
 
-    url_mapping = create_short_url(url.url)
+    url_mapping = create_short_url(full_url.full_url)
     data = ShortURL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",

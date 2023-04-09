@@ -1,9 +1,7 @@
-from flask import jsonify
+import os
 from sqlalchemy.sql import func
 from dbmodel import db, url_mapper, url_mapper_schema
 from sqlalchemy.orm.exc import UnmappedInstanceError
-import os
-import traceback
 from model.error import InternalServer
 
 def create_short_url(full_url) -> dict:

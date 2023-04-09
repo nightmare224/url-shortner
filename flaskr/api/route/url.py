@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from model.url import URL
+from model.url import FullURL
 from model.shorturl import ShortURL
 from model.error import BadRequest, NotFound
-from schema.url import URLSchema
+from schema.url import FullURLSchema
 from schema.shorturl import ShortURLSchema
 from marshmallow import ValidationError
 from shortner import (
@@ -34,7 +34,7 @@ def get_url(short_url_id):
         301:
             description: Get the full URL.
             schema:
-                $ref: '#/definitions/URL'
+                $ref: '#/definitions/FullURL'
         404:
             description: Short URL ID not found.
     """
@@ -42,13 +42,13 @@ def get_url(short_url_id):
         raise NotFound("Short URL ID not found.")
 
     url_mapping = query_url_mapping(short_url_id = short_url_id)
-    url = URL(url=url_mapping["full_url"])
+    full_url = FullURL(full_url=url_mapping["full_url"])
     short_url = ShortURL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
     )
 
-    payload = URLSchema().dump(url)
+    payload = FullURLSchema().dump(full_url)
     payload.update(ShortURLSchema().dump(short_url))
     return payload, 301
 
@@ -66,10 +66,10 @@ def update_url(short_url_id):
         type: string
         required: true
         description: The result of Base 62 encode of URL ID
-      - name: URL
+      - name: FullURL
         in: body
         schema:
-            $ref: '#/definitions/URL'
+            $ref: '#/definitions/FullURL'
     description: Get all shorten URL.
     responses:
         200:
@@ -82,7 +82,7 @@ def update_url(short_url_id):
     
     try:
         request_data = request.get_json()
-        url = URLSchema().load(request_data)
+        full_url = FullURLSchema().load(request_data)
     except ValidationError:
         raise BadRequest("Invalid payload.")
     
@@ -90,23 +90,23 @@ def update_url(short_url_id):
         raise NotFound("Short URL ID not found.")
 
     # the mapping of full url to short url already existed
-    if not is_full_url_not_found(url.url):
+    if not is_full_url_not_found(full_url.full_url):
         # get the exist mapping and delete (ignore if same)
-        url_mapping_old = query_url_mapping(full_url = url.url)
+        url_mapping_old = query_url_mapping(full_url = full_url.full_url)
         if url_mapping_old["short_url_id"] != short_url_id:
             delete_short_url(url_mapping_old["short_url_id"])
 
     # update mapping
-    _ = update_full_url(short_url_id, url.url)
+    _ = update_full_url(short_url_id, full_url.full_url)
 
     # query the update result
-    url_mapping = query_url_mapping(full_url = url.url)
+    url_mapping = query_url_mapping(full_url = full_url.full_url)
     short_url = ShortURL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
     )
 
-    payload = URLSchema().dump(url)
+    payload = FullURLSchema().dump(full_url)
     payload.update(ShortURLSchema().dump(short_url))
     return jsonify(payload), 200
 

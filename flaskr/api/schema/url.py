@@ -2,22 +2,21 @@ import re
 from marshmallow import (
     Schema,
     fields,
-    pre_load,
     post_load,
     validates_schema,
     ValidationError,
 )
-from model.url import URL
+from model.url import FullURL
 
-class URLSchema(Schema):
-    url = fields.String()
-    # url = fields.Url() # do the URL validation
+class FullURLSchema(Schema):
+    full_url = fields.String()
+    # full_url = fields.Url() # do the URL validation
 
     @validates_schema
     def validate_url(self, data, **kwargs):
-        url = data["url"]
+        full_url = data["full_url"]
         result = re.match(
-            r"^([a-zA-Z]+)://([a-zA-Z0-9\-\.]+)(:\d+)?(/[^ \t\n\r\f\v?]*)*(\?\S*)?$", url
+            r"^([a-zA-Z]+)://([a-zA-Z0-9\-\.]+)(:\d+)?(/[^ \t\n\r\f\v?]*)*(\?\S*)?$", full_url
         )
         if result is None:
             raise ValidationError("Invalid URL")
@@ -60,10 +59,10 @@ class URLSchema(Schema):
             if len(query) > 1:
                 query_sanitize = query
 
-        # url after sanitize
-        data["url"] = f"{scheme_sanitize}://{host_sanitize}{port_sanitize}{path_sanitize}{query_sanitize}"
+        # full_url after sanitize
+        data["full_url"] = f"{scheme_sanitize}://{host_sanitize}{port_sanitize}{path_sanitize}{query_sanitize}"
 
     # deserialization
     @post_load
     def __post_load__(self, data, **kwargs):
-        return URL(**data)
+        return FullURL(**data)
