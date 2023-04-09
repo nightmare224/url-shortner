@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from model.shorturl import ShortURL
+from model.url import URL
 from schema.shorturl import ShortURLSchema
 from schema.url import URLSchema
 from model.error import BadRequest, NotFound, InternalServer
@@ -27,14 +28,16 @@ def get_short_url_api():
     payload = []
     url_mapping_all = query_url_mapping()
     for url_mapping in url_mapping_all:
-        data = ShortURL(
+        short_url = ShortURL(
             short_url_id=url_mapping["short_url_id"],
             short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
         )
-        try:
-            payload.append(ShortURLSchema().dump(data))
-        except:
-            raise InternalServer("The data from database mismatch API schema.")
+        url = URL(
+            url=url_mapping["full_url"]
+        )
+        data = ShortURLSchema().dump(short_url)
+        data.update(URLSchema().dump(url))
+        payload.append(data)
 
     return payload, 200
 
@@ -58,13 +61,13 @@ def create_short_url_api():
             schema:
                 $ref: '#/definitions/ShortURL'
         400:
-            description: Invalid URL.
+            description: Invalid payload.
     """
     try:
         request_data = request.get_json()
         url = URLSchema().load(request_data)
     except:
-        raise BadRequest("Invalid URL")
+        raise BadRequest("Invalid payload.")
 
     # the mapping of full url to short url already existed
     if not is_full_url_not_found(url.url):
@@ -75,11 +78,8 @@ def create_short_url_api():
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
     )
-    try:
-        payload = ShortURLSchema().dump(data)
-    except:
-        raise InternalServer("The data from database mismatch API schema.")
-
+    
+    payload = ShortURLSchema().dump(data)
     return payload, 201
 
 

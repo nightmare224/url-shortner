@@ -10,8 +10,8 @@ from shortner import (
     update_full_url,
     delete_short_url,
     is_full_url_not_found,
+    is_short_url_id_not_found
 )
-from sqlalchemy.orm.exc import UnmappedInstanceError
 
 url_restapi = Blueprint("url_restapi", __name__)
 
@@ -35,11 +35,13 @@ def get_url(short_url_id):
             description: Get the full URL.
             schema:
                 $ref: '#/definitions/URL'
+        404:
+            description: Short URL ID not found.
     """
-    try:
-        url_mapping = query_url_mapping(short_url_id = short_url_id)
-    except:
+    if is_short_url_id_not_found(short_url_id):
         raise NotFound("Short URL ID not found.")
+
+    url_mapping = query_url_mapping(short_url_id = short_url_id)
     url = URL(url=url_mapping["full_url"])
     short_url = ShortURL(
         short_url_id=url_mapping["short_url_id"],
@@ -73,25 +75,40 @@ def update_url(short_url_id):
         200:
             description: Updated succeed.
         400:
-            description: Invalid input.
+            description: Invalid payload.
         404:
             description: Short URL ID not found.
     """
+    
     try:
         request_data = request.get_json()
         url = URLSchema().load(request_data)
-        # the mapping of full url to short url already existed
-        if not is_full_url_not_found(url.url):
-            raise BadRequest("The URL already has short URL.")
-        result = update_full_url(short_url_id, url.url)
-
     except ValidationError:
         raise BadRequest("Invalid payload.")
-    except UnmappedInstanceError:
-        raise NotFound("Invalid ID.")
-    else:
-        payload = {"updated": "true", "id": result}
-        return jsonify(payload), 200
+    
+    if is_short_url_id_not_found(short_url_id):
+        raise NotFound("Short URL ID not found.")
+
+    # the mapping of full url to short url already existed
+    if not is_full_url_not_found(url.url):
+        # get the exist mapping and delete (ignore if same)
+        url_mapping_old = query_url_mapping(full_url = url.url)
+        if url_mapping_old["short_url_id"] != short_url_id:
+            delete_short_url(url_mapping_old["short_url_id"])
+
+    # update mapping
+    _ = update_full_url(short_url_id, url.url)
+
+    # query the update result
+    url_mapping = query_url_mapping(full_url = url.url)
+    short_url = ShortURL(
+        short_url_id=url_mapping["short_url_id"],
+        short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+    )
+
+    payload = URLSchema().dump(url)
+    payload.update(ShortURLSchema().dump(short_url))
+    return jsonify(payload), 200
 
 
 @url_restapi.route("/<short_url_id>", methods=["DELETE"])
@@ -114,9 +131,8 @@ def delete_url(short_url_id):
         404:
             description: Short URL ID not found.
     """
-    try:
-        delete_short_url(short_url_id)
-    except UnmappedInstanceError:
-        raise NotFound("Invalid ID.")
+    if is_short_url_id_not_found(short_url_id):
+        raise NotFound("Short URL ID not found.")
     else:
+        delete_short_url(short_url_id)
         return jsonify({}), 204

@@ -17,7 +17,7 @@ class URLSchema(Schema):
     def validate_url(self, data, **kwargs):
         url = data["url"]
         result = re.match(
-            r"^([a-z]+)://([a-z0-9\-\.]+)(:\d+)?(/[^ \t\n\r\f\v?]*)*(\?\S*)?$", url
+            r"^([a-zA-Z]+)://([a-zA-Z0-9\-\.]+)(:\d+)?(/[^ \t\n\r\f\v?]*)*(\?\S*)?$", url
         )
         if result is None:
             raise ValidationError("Invalid URL")
@@ -28,11 +28,13 @@ class URLSchema(Schema):
         query = result.group(5)
 
         # scheme
+        scheme_sanitize = scheme.lower()
         if scheme not in ["http", "https", "ftp"]:
             raise ValidationError("Invalid URL")
 
         # host
-        labels = host.split(".")
+        host_sanitize = host.lower()
+        labels = host_sanitize.split(".")
         for label in labels:
             if label:
                 # not start and end with -
@@ -59,12 +61,7 @@ class URLSchema(Schema):
                 query_sanitize = query
 
         # url after sanitize
-        data["url"] = f"{scheme}://{host}{port_sanitize}{path_sanitize}{query_sanitize}"
-
-    @pre_load
-    def uncapital_url(self, data, **kwargs):
-        data["url"] = data["url"].lower()
-        return data
+        data["url"] = f"{scheme_sanitize}://{host_sanitize}{port_sanitize}{path_sanitize}{query_sanitize}"
 
     # deserialization
     @post_load
