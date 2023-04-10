@@ -7,5 +7,3 @@ CREATE TABLE url_mapper
   full_url VARCHAR(1000) NOT NULL,
   PRIMARY KEY (url_id)
 );
-
-INSERT INTO url_mapper VALUES(1,'b','dummy','dummy');

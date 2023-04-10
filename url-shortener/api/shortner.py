@@ -153,11 +153,15 @@ def query_url_mapping(*args, short_url_id=None, full_url=None):
 
 
 def query_next_unique_id() -> int:
-    id = db.session.query(func.max(url_mapper.url_id)).scalar()
-    if id is None:
-        return 1
-    else:
-        return id + 1
+    result = db.session.query(url_mapper.url_id).all()
+    id_set = set([id[0] for id in result])
+    id_next = 1
+    for i in range(len(id_set)):
+        if id_next not in id_set:
+            break
+        else:
+            id_next += 1
+    return id_next
 
 
 def update_full_url(short_url_id, full_url):
