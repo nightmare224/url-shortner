@@ -1,4 +1,4 @@
-# url-shortner
+# url-shortener
 URL shortener for UVA project
 
 ## Installation
