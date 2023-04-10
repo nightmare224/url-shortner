@@ -125,7 +125,7 @@ def is_short_url_id_not_found(short_url_id) -> bool:
 #             result.append(url_mapper_schema.dump(url_map))
 #     return result
 
-def query_url_mapping(*args, short_url_id = None, full_url = None):
+def query_url_mapping(*args, short_url_id=None, full_url=None):
     url_id = None
     if args:
         raise InternalServer("Provide short_url_id or full_url to get url_mapping")

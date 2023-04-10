@@ -41,7 +41,7 @@ def get_url(short_url_id):
     if is_short_url_id_not_found(short_url_id):
         raise NotFound("Short URL ID not found.")
 
-    url_mapping = query_url_mapping(short_url_id = short_url_id)
+    url_mapping = query_url_mapping(short_url_id=short_url_id)
     url = URL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
@@ -93,7 +93,7 @@ def update_url(short_url_id):
     # the mapping of full url to short url already existed
     if not is_full_url_not_found(full_url.full_url):
         # get the exist mapping and delete (ignore if same)
-        url_mapping_old = query_url_mapping(full_url = full_url.full_url)
+        url_mapping_old = query_url_mapping(full_url=full_url.full_url)
         if url_mapping_old["short_url_id"] != short_url_id:
             delete_short_url(url_mapping_old["short_url_id"])
 
@@ -101,7 +101,7 @@ def update_url(short_url_id):
     _ = update_full_url(short_url_id, full_url.full_url)
 
     # query the update result
-    url_mapping = query_url_mapping(full_url = full_url.full_url)
+    url_mapping = query_url_mapping(full_url=full_url.full_url)
     url = URL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
