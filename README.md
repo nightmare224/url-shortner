@@ -46,3 +46,11 @@ API_PORT=5001
 API_DEBUG=True
 BASE_URL_FOR_SHORT_URL=https://snv.io
 ```
+
+
+
+## Reference
+
+- Our application refer to [this structure](https://auth0.com/blog/best-practices-for-flask-api-development/), as we consider it as properly structure.
+
+- The error handle of our application for 400 and 404 exceptions refer to [Blueprint Error Handlers](https://flask.palletsprojects.com/en/2.2.x/errorhandling/#blueprint-error-handlers) in Flask official document.
