@@ -47,45 +47,25 @@ def delete_short_url(short_url_id) -> str:
     return short_url_id
 
 
-# def query_full_url(short_url_id) -> str:
-#     """
-#     To get the full URL from provided short url
-#     parameter:
-#         short_url_id : short ur id which is without the domain name [base url]
-#     returns:
-#         full url with http protocol as well.
-#     """
-#     url_id = base62_decode(short_url_id=short_url_id)
-#     url_map = url_mapper.query.get(url_id)
-#     if url_map is not None:
-#         result = url_mapper_schema.dump(url_map)
-#         short_url = get_short_url(result)
-#         full_url = result["full_url"]
-#         # TODO : return both short and full url
-#         return full_url
-
-
 def base62_encode(url_id) -> str:
     base62_values = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    short_url_id = ""
     base = 62
+    short_url_id = ""
     while url_id > 0:
         r = url_id % base
-        short_url_id += base62_values[r]
+        short_url_id = base62_values[r] + short_url_id
         url_id //= base
-    return short_url_id[len(short_url_id) :: -1]
 
+    return short_url_id if short_url_id else base62_values[0]
 
 def base62_decode(short_url_id) -> int:
+    base62_values = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    base = 62
     url_id = 0
-    for letter in short_url_id:
-        letter_val = ord(letter)
-        if letter_val >= ord("a") and letter_val <= ord("z"):
-            url_id = url_id * 62 + letter_val - ord("a")
-        elif letter_val >= ord("A") and letter_val <= ord("Z"):
-            url_id = url_id * 62 + letter_val - ord("A") + 26
-        else:
-            url_id = url_id * 62 + letter_val - ord("0") + 52
+    for i, letter in enumerate(short_url_id[::-1]):
+        val = base62_values.index(letter)
+        url_id = url_id + val * base**i
+
     return url_id
 
 
@@ -111,19 +91,6 @@ def is_short_url_id_not_found(short_url_id) -> bool:
         not_found = True
     return not_found
 
-# def query_url_mapping(full_url=None):
-#     if full_url:
-#         url_id = db.session.query("*").filter(url_mapper.full_url == full_url).scalar()
-#         url_map = url_mapper.query.get(url_id)
-#         result = url_mapper_schema.dump(url_map)
-#     else:
-#         # return all if not specify full_url
-#         result = []
-#         url_id_list = db.session.query(url_mapper.url_id).all()
-#         for url_id in url_id_list:
-#             url_map = url_mapper.query.get(url_id)
-#             result.append(url_mapper_schema.dump(url_map))
-#     return result
 
 def query_url_mapping(*args, short_url_id=None, full_url=None):
     url_id = None
@@ -138,7 +105,7 @@ def query_url_mapping(*args, short_url_id=None, full_url=None):
         if url_id is None:
             raise InternalServer("short_url_id not found in database.")
         
-    if url_id:
+    if url_id is not None:
         url_map = url_mapper.query.get(url_id)
         result = url_mapper_schema.dump(url_map)
     # get all result if not provide variable
@@ -155,7 +122,7 @@ def query_url_mapping(*args, short_url_id=None, full_url=None):
 def query_next_unique_id() -> int:
     result = db.session.query(url_mapper.url_id).all()
     id_set = set([id[0] for id in result])
-    id_next = 1
+    id_next = 0
     for i in range(len(id_set)):
         if id_next not in id_set:
             break
@@ -171,17 +138,3 @@ def update_full_url(short_url_id, full_url):
     url_map.full_url = full_url
     db.session.commit()
     return short_url_id
-
-
-def get_short_url(url_mapper_dump) -> str:
-    baseUrl = url_mapper_dump["short_base_url"]
-    baseUrl = clean_base_url(baseUrl)
-    short_url_id = url_mapper_dump["short_url_id"]
-    short_url = baseUrl + "/" + short_url_id
-    return short_url
-
-
-def clean_base_url(base_url) -> str:
-    base_url.strip("/")
-    base_url.strip(".")
-    return base_url
