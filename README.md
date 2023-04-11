@@ -1,31 +1,48 @@
 # url-shortener
 URL shortener for UVA project
 
-## Installation
-To run the project locally, after cloning, install all the dependencies.
-```
-pip install -r requirements.txt
-```
-Then get inside flaskr dir
-```
-cd flaskr
-```
-## How to spin-up docker compose
+## Quick Started
 
-run the following command, api and database should be able to spin-up
+### Prerequisite
 
+- **Install Docker engine and Docker compose**
+
+  > The easiest way is to install [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/), which includes Docker Compose along with Docker Engine and Docker CLI.
+
+### Install
+
+To install url-shortener service, follow the below steps:
+
+1. **Clone the url-shortener repository**
+
+   ```
+   git clone https://github.com/Vishwamitra/url-shortner.git
+   ```
+
+2. **Deploy and run url-shortener service**
+
+   ```bash
+   bash url-shortener/url-shortener/run.sh
+   ```
+
+### Usage
+
+See and interact with RESTful APIs on **http://127.0.0.1:5001/apidocs/**
+
+
+
+## Development
+
+### Docker environment variable configuration
+
+If you want your url-shortener service run on different port, configure the environment variable in `url-shortener/url-shortener/.env` file. Also, you can modify the database password and the base URL in this file. The default configuration is shown as below.
+
+```ini
+DATABASE_NAME=postgres
+DATABASE_USER=postgresadmin
+DATABASE_PASSWORD=admin123
+DATABASE_PORT=5432
+API_PORT=5001
+API_DEBUG=True
+BASE_URL_FOR_SHORT_URL=https://snv.io
 ```
-docker-compose up --build --force-recreate
-```
-
-After successful, you should be able to connect to postgres db
-
-```
-host: 127.0.0.1
-port: 5432
-user: postgresadmin
-password: admin123
-
-```
-
-Also you should be able to make api calls on your localhost
