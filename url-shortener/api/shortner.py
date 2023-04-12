@@ -48,7 +48,7 @@ def delete_short_url(short_url_id) -> str:
 
 
 def base62_encode(url_id) -> str:
-    base62_values = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    base62_values = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     base = 62
     short_url_id = ""
     while url_id > 0:
@@ -59,7 +59,7 @@ def base62_encode(url_id) -> str:
     return short_url_id if short_url_id else base62_values[0]
 
 def base62_decode(short_url_id) -> int:
-    base62_values = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    base62_values = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     base = 62
     url_id = 0
     for i, letter in enumerate(short_url_id[::-1]):
