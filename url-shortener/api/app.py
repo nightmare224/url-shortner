@@ -19,6 +19,9 @@ app.config.from_mapping(
 )
 db.app = app
 db.init_app(app)
+# create table in database
+with app.app_context():
+    db.create_all()
 
 # For Documatation (flasgger configuration)
 spec = APISpec(
