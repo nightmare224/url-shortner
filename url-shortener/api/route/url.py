@@ -12,11 +12,13 @@ from shortner import (
     is_full_url_not_found,
     is_short_url_id_not_found
 )
+from lib.authenticator import require_login
 
 url_restapi = Blueprint("url_restapi", __name__)
 
 
 @url_restapi.route("/<short_url_id>", methods=["GET"])
+@require_login
 def get_url(short_url_id):
     """
     Get the full URL through short URL ID.
@@ -24,6 +26,11 @@ def get_url(short_url_id):
     tags:
       - Full URL APIs
     parameters:
+      - in: header
+        name: Authorization
+        required: true
+        type: string
+        description: The format is `Bearer <access_token>`.
       - in: path
         name: short_url_id
         type: string
@@ -53,6 +60,7 @@ def get_url(short_url_id):
 
 
 @url_restapi.route("/<short_url_id>", methods=["PUT"])
+@require_login
 def update_url(short_url_id):
     """
     Update the mapping of short URL ID and full URL.
@@ -60,6 +68,11 @@ def update_url(short_url_id):
     tags:
       - Full URL APIs
     parameters:
+      - in: header
+        name: Authorization
+        required: true
+        type: string
+        description: The format is `Bearer <access_token>`.
       - in: path
         name: short_url_id
         type: string
@@ -113,6 +126,7 @@ def update_url(short_url_id):
 
 
 @url_restapi.route("/<short_url_id>", methods=["DELETE"])
+@require_login
 def delete_url(short_url_id):
     """
     Delete the mapping of short URL ID and full URL.
@@ -120,6 +134,11 @@ def delete_url(short_url_id):
     tags:
       - Full URL APIs
     parameters:
+      - in: header
+        name: Authorization
+        required: true
+        type: string
+        description: The format is `Bearer <access_token>`.
       - in: path
         name: short_url_id
         type: string

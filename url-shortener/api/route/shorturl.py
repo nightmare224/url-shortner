@@ -5,11 +5,12 @@ from schema.shorturl import ShortURLSchema
 from schema.url import FullURLSchema, URLSchema
 from model.error import BadRequest, NotFound, InternalServer
 from shortner import query_url_mapping, create_short_url, is_full_url_not_found
+from lib.authenticator import require_login
 
 shorturl_restapi = Blueprint("shorturl_restapi", __name__)
 
-
 @shorturl_restapi.route("/", methods=["GET"])
+@require_login
 def get_short_url_api():
     """
     Get all shorten URL.
@@ -17,6 +18,12 @@ def get_short_url_api():
     tags:
       - Short URL APIs
     description: Get all URL information.
+    parameters:
+      - in: header
+        name: Authorization
+        required: true
+        type: string
+        description: The format is `Bearer <access_token>`.
     responses:
         200:
             description: Get a list of URL information.
@@ -39,6 +46,7 @@ def get_short_url_api():
 
 
 @shorturl_restapi.route("/", methods=["POST"])
+@require_login
 def create_short_url_api():
     """
     Create shorten URL by passing a full URL in the payload.
@@ -47,6 +55,11 @@ def create_short_url_api():
       - Short URL APIs
     description: Create shorten URL by passing a full URL in the payload.
     parameters:
+      - in: header
+        name: Authorization
+        required: true
+        type: string
+        description: The format is `Bearer <access_token>`.
       - name: FullURL
         in: body
         schema:
