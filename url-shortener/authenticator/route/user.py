@@ -1,130 +1,86 @@
 from flask import Blueprint, jsonify, request
 from model.user import User
-from model.error import BadRequest, NotFound
+from model.jwt import JWTPayload, JWT
+from model.error import BadRequest, NotFound, Conflict, Forbidden
 from schema.user import UserSchema
+from schema.jwt import JWTSchema
 from marshmallow import ValidationError
+from dbquery import is_user_exist, add_user, authenticate_user
 
 user_restapi = Blueprint("user_restapi", __name__)
 
 
-# @user_restapi.route("/<short_url_id>", methods=["GET"])
-# def create_user(short_url_id):
-#     """
-#     Get the full URL through short URL ID.
-#     ---
-#     tags:
-#       - Full URL APIs
-#     parameters:
-#       - in: path
-#         name: short_url_id
-#         type: string
-#         required: true
-#         description: The result of Base 62 encode of URL ID
-#     description: Get the URL information of the corresponding short URL ID.
-#     responses:
-#         301:
-#             description: Get the URL information of the corresponding short URL ID.
-#             schema:
-#                 $ref: '#/definitions/URL'
-#         404:
-#             description: Short URL ID not found.
-#     """
-#     if is_short_url_id_not_found(short_url_id):
-#         raise NotFound("Short URL ID not found.")
+@user_restapi.route("/users", methods=["POST"])
+def create_user():
+    """
+    Create a new user with username and password.
+    ---
+    tags:
+      - Users APIs
+    parameters:
+      - name: User
+        in: body
+        schema:
+            $ref: '#/definitions/User'
+    description: Create a new user with username and password.
+    responses:
+        201:
+            description: Create new user success.
+            schema:
+                $ref: '#/definitions/User'
+        409:
+            description: The user have already existed.
+    """
+    try:
+        request_data = request.get_json()
+        user = UserSchema().load(request_data)
+    except ValidationError:
+        raise BadRequest("Invalid payload.")
 
-#     url_mapping = query_url_mapping(short_url_id=short_url_id)
-#     url = URL(
-#         short_url_id=url_mapping["short_url_id"],
-#         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
-#         full_url=url_mapping["full_url"]
-#     )
+    if is_user_exist(user.username):
+        raise Conflict("The user with same username already existed.")
 
-#     payload = URLSchema().dump(url)
-#     return payload, 301
+    add_user(user.username, user.password)
 
-
-# @url_restapi.route("/<short_url_id>", methods=["PUT"])
-# def update_url(short_url_id):
-#     """
-#     Update the mapping of short URL ID and full URL.
-#     ---
-#     tags:
-#       - Full URL APIs
-#     parameters:
-#       - in: path
-#         name: short_url_id
-#         type: string
-#         required: true
-#         description: The result of Base 62 encode of URL ID
-#       - name: FullURL
-#         in: body
-#         schema:
-#             $ref: '#/definitions/FullURL'
-#     description: Update the mapping of short URL ID and full URL and get the update URL information.
-#     responses:
-#         200:
-#             description: Updated succeed.
-#             schema:
-#                 $ref: '#/definitions/URL'
-#         400:
-#             description: Invalid payload.
-#         404:
-#             description: Short URL ID not found.
-#     """
-    
-#     try:
-#         request_data = request.get_json()
-#         full_url = FullURLSchema().load(request_data)
-#     except ValidationError:
-#         raise BadRequest("Invalid payload.")
-    
-#     if is_short_url_id_not_found(short_url_id):
-#         raise NotFound("Short URL ID not found.")
-
-#     # the mapping of full url to short url already existed
-#     if not is_full_url_not_found(full_url.full_url):
-#         # get the exist mapping and delete (ignore if same)
-#         url_mapping_old = query_url_mapping(full_url=full_url.full_url)
-#         if url_mapping_old["short_url_id"] != short_url_id:
-#             delete_short_url(url_mapping_old["short_url_id"])
-
-#     # update mapping
-#     _ = update_full_url(short_url_id, full_url.full_url)
-
-#     # query the update result
-#     url_mapping = query_url_mapping(full_url=full_url.full_url)
-#     url = URL(
-#         short_url_id=url_mapping["short_url_id"],
-#         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
-#         full_url = url_mapping["full_url"]
-#     )
-
-#     payload = URLSchema().dump(url)
-#     return jsonify(payload), 200
+    return jsonify({}), 201
 
 
-# @url_restapi.route("/<short_url_id>", methods=["DELETE"])
-# def delete_url(short_url_id):
-#     """
-#     Delete the mapping of short URL ID and full URL.
-#     ---
-#     tags:
-#       - Full URL APIs
-#     parameters:
-#       - in: path
-#         name: short_url_id
-#         type: string
-#         required: true
-#         description: The result of Base 62 encode of URL ID
-#     description: Get all shorten URL.
-#     responses:
-#         204:
-#             description: Delete succeed.
-#         404:
-#             description: Short URL ID not found.
-#     """
-#     if is_short_url_id_not_found(short_url_id):
-#         raise NotFound("Short URL ID not found.")
-#     else:
-#         delete_short_url(short_url_id)
-#         return jsonify({}), 204
+@user_restapi.route("/users/login", methods=["POST"])
+def login_user():
+    """
+    User login with username and password.
+    ---
+    tags:
+      - Users APIs
+    parameters:
+      - name: User
+        in: body
+        schema:
+            $ref: '#/definitions/User'
+    description: User login with username and password.
+    responses:
+        200:
+            description: Login success, return JWT.
+            schema:
+                $ref: '#/definitions/User'
+        403:
+            description: Login failed.
+    """
+    try:
+        request_data = request.get_json()
+        user = UserSchema().load(request_data)
+    except ValidationError:
+        raise BadRequest("Invalid payload.")
+
+    if not authenticate_user(user.username, user.password):
+        raise Forbidden("Invalid username or password.")
+
+    jwt = JWT(
+        payload = JWTPayload(
+            sub = "1",
+            sid = "12"
+        )
+    )
+
+    payload = JWTSchema().dump(jwt)
+    return jsonify(payload), 200
