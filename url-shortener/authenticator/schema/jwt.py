@@ -1,8 +1,7 @@
 import json
-import os
+from hashlib import sha512
 from base64 import urlsafe_b64encode
-import hashlib
-import hmac
+from Crypto.PublicKey import RSA
 from marshmallow import Schema, fields, post_dump
 from model.jwt import JWTHeader, JWTPayload
 
@@ -49,9 +48,12 @@ class JWTSchema(Schema):
         )
 
         # signature
+        with open('key/private_key.pem','r') as f:
+            private_key = RSA.import_key(f.read())
         header_payload = f"{header_b64}.{payload_b64}".encode("utf-8")
-        secret = os.environ.get("ACCESS_TOKEN_SECRET").encode("utf-8")
-        signature = hmac.new(secret, header_payload, hashlib.sha256).digest()
-        signature_b64 = urlsafe_b64encode(signature).decode("utf-8").replace("=", "")
+        hash = int.from_bytes(sha512(header_payload).digest(), byteorder='big')
+        signature = pow(hash, private_key.d, private_key.n)
+        signature_binary = signature.to_bytes((signature.bit_length() + 7) // 8, 'big')
+        signature_b64 = urlsafe_b64encode(signature_binary).decode("utf-8").replace("=", "")
 
         return {"access_token": f"{header_b64}.{payload_b64}.{signature_b64}"}

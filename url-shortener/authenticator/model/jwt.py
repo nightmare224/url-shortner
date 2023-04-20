@@ -4,7 +4,7 @@ from time import time
 
 @dataclass
 class JWTHeader():
-    alg: str = "HS256"
+    alg: str = "RS1024"
     typ: str = "JWT"
 
 @dataclass
