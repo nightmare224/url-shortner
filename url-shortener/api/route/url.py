@@ -5,7 +5,7 @@ from model.error import BadRequest, NotFound
 from schema.url import FullURLSchema, URLSchema
 from schema.shorturl import ShortURLSchema
 from marshmallow import ValidationError
-from shortner import (
+from lib.dbquery import (
     query_url_mapping,
     update_full_url,
     delete_short_url,

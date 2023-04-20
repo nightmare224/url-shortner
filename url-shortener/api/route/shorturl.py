@@ -4,8 +4,8 @@ from model.url import FullURL, URL
 from schema.shorturl import ShortURLSchema
 from schema.url import FullURLSchema, URLSchema
 from model.error import BadRequest, NotFound, InternalServer
-from shortner import query_url_mapping, create_short_url, is_full_url_not_found
-from lib.authenticator import require_login
+from lib.dbquery import query_url_mapping, create_short_url, is_full_url_not_found
+from lib.authenticator import require_login, decode_token
 
 shorturl_restapi = Blueprint("shorturl_restapi", __name__)
 
@@ -32,6 +32,10 @@ def get_short_url_api():
                 items:
                     $ref: '#/definitions/URL'
     """
+    _, token_payload, _ = decode_token()
+    user_id = token_payload["sub"]
+    print(user_id)
+
     payload = []
     url_mapping_all = query_url_mapping()
     for url_mapping in url_mapping_all:

@@ -5,7 +5,7 @@ from model.error import BadRequest, NotFound, Conflict, Forbidden
 from schema.user import UserSchema
 from schema.jwt import JWTSchema
 from marshmallow import ValidationError
-from dbquery import is_user_exist, add_user, authenticate_user
+from lib.dbquery import is_user_exist, add_user, authenticate_user
 
 user_restapi = Blueprint("user_restapi", __name__)
 
