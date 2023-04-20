@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flasgger import Swagger, APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
@@ -5,7 +6,6 @@ from apispec_webframeworks.flask import FlaskPlugin
 from route.user import user_restapi
 from route.error_controller import error_controller
 from schema.user import UserSchema
-import os
 from dbmodel import db
 
 

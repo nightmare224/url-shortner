@@ -10,7 +10,6 @@ class JWTHeader():
 @dataclass
 class JWTPayload():
     sub: str
-    sid: str
     exp: int = ""
     def __post_init__(self):
         if self.exp == "":

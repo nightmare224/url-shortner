@@ -1,13 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
-
+from marshmallow import Schema, fields
 
 # init my cool db
 db = SQLAlchemy()
-
-# init sweet marshmallow
-ma = Marshmallow()
-
 
 # url shortner model class
 class user_info(db.Model):
@@ -15,3 +10,9 @@ class user_info(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(256), unique=True)
     password = db.Column(db.String(256))
+
+
+class UserInfoSchema(Schema):
+    user_id = fields.Integer()
+    username = fields.String()
+    password = fields.String()

@@ -99,12 +99,6 @@ def query_url_mapping(*args, short_url_id=None, full_url=None, user_id=None):
             .filter_by(user_id=user_id)
             .join(url_mapper, url_user_mapper.url_id == url_mapper.url_id)
         )
-        # statement = (
-        #     db.session.query(url_user_mapper.url_id)
-        #     .filter_by(user_id=user_id)
-        #     .join(url_mapper, url_user_mapper.url_id==url_mapper.url_id)
-        #     .all()
-        # )
 
     url_id = None
     if args:

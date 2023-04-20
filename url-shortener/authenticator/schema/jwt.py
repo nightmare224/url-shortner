@@ -17,7 +17,6 @@ class JWTHeaderSchema(Schema):
 
 class JWTPayloadSchema(Schema):
     sub = fields.String()
-    sid = fields.String()
     exp = fields.Integer()
 
     @post_dump

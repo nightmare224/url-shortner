@@ -5,7 +5,7 @@ from model.error import BadRequest, NotFound, Conflict, Forbidden
 from schema.user import UserSchema
 from schema.jwt import JWTSchema
 from marshmallow import ValidationError
-from lib.dbquery import is_user_exist, add_user, authenticate_user
+from lib.dbquery import is_user_exist, add_user, authenticate_user, query_user_info
 
 user_restapi = Blueprint("user_restapi", __name__)
 
@@ -26,10 +26,8 @@ def create_user():
     responses:
         201:
             description: Create new user success.
-            schema:
-                $ref: '#/definitions/User'
         409:
-            description: The user have already existed.
+            description: The user already existed.
     """
     try:
         request_data = request.get_json()
@@ -60,9 +58,15 @@ def login_user():
     description: User login with username and password.
     responses:
         200:
-            description: Login success, return JWT.
+            description: Login success, return access token.
             schema:
-                $ref: '#/definitions/User'
+                required:
+                    - access_token
+                properties:
+                    access_token:
+                        type: string
+                        example: eyJhbGciOiJSUzEwMjQiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2ODIwMTY4MjQsInN1YiI6IjMifQ.MViPBWVYtnOnc8iQfroltUF6uSdDcQPN5qLCqkkbXXzfe3yzldA5ZZ4lW4H3kpKlnguYiJnUNw_G454G0N2XYJQ9TWQzWkjLw07dvbKvLcIDyXro7wkjw9N9WCMVYDj9wGwGwzcoj3q26cMaBvYNz5GxAoTjQNcgFMAMlsAKWaU
+                        description: access token
         403:
             description: Login failed.
     """
@@ -75,12 +79,12 @@ def login_user():
     if not authenticate_user(user.username, user.password):
         raise Forbidden("Invalid username or password.")
 
+    # retrieve user info
+    user_info = query_user_info(user.username)
     jwt = JWT(
         payload = JWTPayload(
-            sub = "1",
-            sid = "12"
+            sub = user_info['user_id']
         )
     )
-
     payload = JWTSchema().dump(jwt)
     return jsonify(payload), 200

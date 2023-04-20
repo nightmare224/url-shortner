@@ -1,4 +1,4 @@
-from dbmodel import db, user_info
+from dbmodel import db, user_info, UserInfoSchema
 
 
 def is_user_exist(username) -> bool:
@@ -11,6 +11,16 @@ def add_user(username, password) -> str:
     user = user_info(username=username, password=password)
     db.session.add(user)
     db.session.commit()
+
+
+def query_user_info(username):
+    user_id = db.session.query(user_info.user_id).filter_by(username=username).scalar()
+    if user_id is None:
+        return None
+
+    data = user_info.query.get(user_id)
+    
+    return UserInfoSchema().dump(data)
 
 
 def authenticate_user(username, password) -> bool:
