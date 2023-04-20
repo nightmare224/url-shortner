@@ -12,7 +12,7 @@ from lib.dbquery import (
     is_full_url_not_found,
     is_short_url_id_not_found
 )
-from lib.authenticator import require_login
+from lib.authenticator import require_login, decode_token
 
 url_restapi = Blueprint("url_restapi", __name__)
 
@@ -45,10 +45,14 @@ def get_url(short_url_id):
         404:
             description: Short URL ID not found.
     """
-    if is_short_url_id_not_found(short_url_id):
+    # get user_id from token
+    _, token_payload, _ = decode_token()
+    user_id = token_payload["sub"]
+
+    if is_short_url_id_not_found(short_url_id, user_id):
         raise NotFound("Short URL ID not found.")
 
-    url_mapping = query_url_mapping(short_url_id=short_url_id)
+    url_mapping = query_url_mapping(short_url_id=short_url_id, user_id=user_id)
     url = URL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
@@ -93,20 +97,23 @@ def update_url(short_url_id):
         404:
             description: Short URL ID not found.
     """
-    
+    # get user_id from token
+    _, token_payload, _ = decode_token()
+    user_id = token_payload["sub"]
+
     try:
         request_data = request.get_json()
         full_url = FullURLSchema().load(request_data)
     except ValidationError:
         raise BadRequest("Invalid payload.")
     
-    if is_short_url_id_not_found(short_url_id):
+    if is_short_url_id_not_found(short_url_id, user_id):
         raise NotFound("Short URL ID not found.")
 
     # the mapping of full url to short url already existed
-    if not is_full_url_not_found(full_url.full_url):
+    if not is_full_url_not_found(full_url.full_url, user_id):
         # get the exist mapping and delete (ignore if same)
-        url_mapping_old = query_url_mapping(full_url=full_url.full_url)
+        url_mapping_old = query_url_mapping(full_url=full_url.full_url, user_id=user_id)
         if url_mapping_old["short_url_id"] != short_url_id:
             delete_short_url(url_mapping_old["short_url_id"])
 
@@ -114,7 +121,7 @@ def update_url(short_url_id):
     _ = update_full_url(short_url_id, full_url.full_url)
 
     # query the update result
-    url_mapping = query_url_mapping(full_url=full_url.full_url)
+    url_mapping = query_url_mapping(full_url=full_url.full_url, user_id=user_id)
     url = URL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
@@ -151,7 +158,11 @@ def delete_url(short_url_id):
         404:
             description: Short URL ID not found.
     """
-    if is_short_url_id_not_found(short_url_id):
+    # get user_id from token
+    _, token_payload, _ = decode_token()
+    user_id = token_payload["sub"]
+    
+    if is_short_url_id_not_found(short_url_id, user_id):
         raise NotFound("Short URL ID not found.")
     else:
         delete_short_url(short_url_id)

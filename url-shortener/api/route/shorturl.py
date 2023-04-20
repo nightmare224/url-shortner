@@ -82,11 +82,15 @@ def create_short_url_api():
     except:
         raise BadRequest("Invalid payload.")
 
+    # get user_id from token
+    _, token_payload, _ = decode_token()
+    user_id = token_payload["sub"]
+
     # the mapping of full url to short url already existed
-    if not is_full_url_not_found(full_url.full_url):
+    if not is_full_url_not_found(full_url.full_url, user_id):
         raise BadRequest("The URL already has short URL.")
 
-    url_mapping = create_short_url(full_url.full_url)
+    url_mapping = create_short_url(full_url.full_url, user_id)
     data = ShortURL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",

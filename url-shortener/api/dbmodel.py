@@ -15,7 +15,7 @@ class url_mapper(db.Model):
     url_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     short_url_id = db.Column(db.String(7), unique=True)
     short_base_url = db.Column(db.String(2048))
-    full_url = db.Column(db.String(2048), unique=True)
+    full_url = db.Column(db.String(2048))
 
     def __init__(self, url_id, short_url_id, short_base_url, full_url):
         self.url_id = url_id

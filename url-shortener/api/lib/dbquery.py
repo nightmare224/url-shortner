@@ -35,6 +35,7 @@ def create_short_url(full_url, user_id) -> dict:
     new_url_user = url_user_mapper(url_id=next_unique_id, user_id=user_id)
     db.session.add(new_url_user)
     db.session.commit()
+
     return url_mapper_schema.dump(new_url)
 
 
@@ -62,22 +63,26 @@ def delete_short_url(short_url_id) -> str:
     return short_url_id
 
 
-def is_full_url_not_found(full_url) -> bool:
-    found = False
+def is_full_url_not_found(full_url, user_id) -> bool:
+    not_found = False
     count = (
-        db.session.query(func.count(url_mapper.url_id))
+        db.session.query(func.count(url_user_mapper.url_id))
+        .filter_by(user_id=user_id)
+        .join(url_mapper, url_user_mapper.url_id == url_mapper.url_id)
         .filter(url_mapper.full_url == full_url)
         .scalar()
     )
     if count < 1:
-        found = True
-    return found
+        not_found = True
+    return not_found
 
 
-def is_short_url_id_not_found(short_url_id) -> bool:
+def is_short_url_id_not_found(short_url_id, user_id) -> bool:
     not_found = False
     count = (
-        db.session.query(func.count(url_mapper.url_id))
+        db.session.query(func.count(url_user_mapper.url_id))
+        .filter_by(user_id=user_id)
+        .join(url_mapper, url_user_mapper.url_id == url_mapper.url_id)
         .filter(url_mapper.short_url_id == short_url_id)
         .scalar()
     )
@@ -92,7 +97,7 @@ def query_url_mapping(*args, short_url_id=None, full_url=None, user_id=None):
         statement = (
             db.session.query(url_user_mapper.url_id)
             .filter_by(user_id=user_id)
-            .join(url_mapper, url_user_mapper.url_id==url_mapper.url_id)
+            .join(url_mapper, url_user_mapper.url_id == url_mapper.url_id)
         )
         # statement = (
         #     db.session.query(url_user_mapper.url_id)
