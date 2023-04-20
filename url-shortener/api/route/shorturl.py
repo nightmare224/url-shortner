@@ -32,12 +32,12 @@ def get_short_url_api():
                 items:
                     $ref: '#/definitions/URL'
     """
+    # get user_id from token
     _, token_payload, _ = decode_token()
     user_id = token_payload["sub"]
-    print(user_id)
 
     payload = []
-    url_mapping_all = query_url_mapping()
+    url_mapping_all = query_url_mapping(user_id = user_id)
     for url_mapping in url_mapping_all:
         url = URL(
             short_url_id=url_mapping["short_url_id"],

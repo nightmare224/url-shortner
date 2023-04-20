@@ -24,10 +24,11 @@ class url_mapper(db.Model):
         self.full_url = full_url
 
 
-# class url_user_mapper(db.Model):
-#     __tablename__ = "user_url_mapper"
-#     url_id = db.Column(db.Integer, db.ForeignKey("url_mapper.url_id", ondelete="CASCADE"), primary_key=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey("user_info.user_id", ondelete="CASCADE"))
+class url_user_mapper(db.Model):
+    __tablename__ = "url_user_mapper"
+    url_id = db.Column(db.Integer, db.ForeignKey("url_mapper.url_id", ondelete="CASCADE"), primary_key=True)
+    user_id = db.Column(db.Integer)
+    # user_id = db.Column(db.Integer, db.ForeignKey("user_info.user_id", ondelete="CASCADE"))
 
 # url mapper class Schema to serealize
 class UrlMapperSchema(ma.Schema):
