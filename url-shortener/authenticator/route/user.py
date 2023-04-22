@@ -2,10 +2,16 @@ from flask import Blueprint, jsonify, request
 from model.user import User
 from model.jwt import JWTPayload, JWT
 from model.error import BadRequest, NotFound, Conflict, Forbidden
-from schema.user import UserSchema
+from schema.user import UserSchema, UserPwdSchema
 from schema.jwt import JWTSchema
 from marshmallow import ValidationError
-from lib.dbquery import is_user_exist, add_user, authenticate_user, query_user_info
+from lib.dbquery import (
+    is_user_exist,
+    add_user,
+    authenticate_user,
+    query_user_info,
+    update_user_password,
+)
 
 user_restapi = Blueprint("user_restapi", __name__)
 
@@ -40,7 +46,40 @@ def create_user():
 
     add_user(user.username, user.password)
 
-    return jsonify({}), 201
+    return jsonify({"create": "success"}), 201
+
+
+@user_restapi.route("/users", methods=["PUT"])
+def update_user():
+    """
+    Create a new user with username and password.
+    ---
+    tags:
+      - Users APIs
+    parameters:
+      - name: User
+        in: body
+        schema:
+            $ref: '#/definitions/UserPwd'
+    description: Create a new user with username and password.
+    responses:
+        201:
+            description: Create new user success.
+        409:
+            description: The user already existed.
+    """
+    try:
+        request_data = request.get_json()
+        user = UserPwdSchema().load(request_data)
+    except ValidationError:
+        raise BadRequest("Invalid payload.")
+
+    if not authenticate_user(user.username, user.password):
+        raise Forbidden("Invalid username or password.")
+
+    update_user_password(user.username, user.new_password)
+
+    return jsonify({"update": "success"}), 200
 
 
 @user_restapi.route("/users/login", methods=["POST"])
@@ -81,10 +120,6 @@ def login_user():
 
     # retrieve user info
     user_info = query_user_info(user.username)
-    jwt = JWT(
-        payload = JWTPayload(
-            sub = user_info['user_id']
-        )
-    )
+    jwt = JWT(payload=JWTPayload(sub=user_info["user_id"]))
     payload = JWTSchema().dump(jwt)
     return jsonify(payload), 200

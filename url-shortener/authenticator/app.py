@@ -5,7 +5,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.flask import FlaskPlugin
 from route.user import user_restapi
 from route.error_controller import error_controller
-from schema.user import UserSchema
+from schema.user import UserSchema, UserPwdSchema
 from dbmodel import db
 
 
@@ -32,7 +32,7 @@ spec = APISpec(
         MarshmallowPlugin(),
     ],
 )
-template = spec.to_flasgger(app, definitions=[UserSchema])
+template = spec.to_flasgger(app, definitions=[UserSchema, UserPwdSchema])
 swagger = Swagger(app, template=template)
 
 

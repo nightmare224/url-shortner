@@ -4,8 +4,7 @@ from marshmallow import (
     fields,
     post_load
 )
-from model.user import User
-from urllib.parse import urlparse, urlunparse
+from model.user import User, UserPwd
 
 class UserSchema(Schema):
     username = fields.String()
@@ -15,3 +14,11 @@ class UserSchema(Schema):
     @post_load
     def __post_load__(self, data, **kwargs):
         return User(**data)
+    
+class UserPwdSchema(UserSchema):
+    new_password = fields.String()
+
+    # deserialization
+    @post_load
+    def __post_load__(self, data, **kwargs):
+        return UserPwd(**data)
