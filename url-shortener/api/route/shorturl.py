@@ -31,6 +31,8 @@ def get_short_url_api():
                 type: array
                 items:
                     $ref: '#/definitions/URL'
+        403:
+            description: Invalid access token.
     """
     # get user_id from token
     _, token_payload, _ = decode_token()
@@ -75,6 +77,8 @@ def create_short_url_api():
                 $ref: '#/definitions/ShortURL'
         400:
             description: Invalid payload.
+        403:
+            description: Invalid access token.
     """
     try:
         request_data = request.get_json()

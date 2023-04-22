@@ -42,6 +42,8 @@ def get_url(short_url_id):
             description: Get the URL information of the corresponding short URL ID.
             schema:
                 $ref: '#/definitions/URL'
+        403:
+            description: Invalid access token.
         404:
             description: Short URL ID not found.
     """
@@ -94,6 +96,8 @@ def update_url(short_url_id):
                 $ref: '#/definitions/URL'
         400:
             description: Invalid payload.
+        403:
+            description: Invalid access token.
         404:
             description: Short URL ID not found.
     """
@@ -155,6 +159,8 @@ def delete_url(short_url_id):
     responses:
         204:
             description: Delete succeed.
+        403:
+            description: Invalid access token.
         404:
             description: Short URL ID not found.
     """
