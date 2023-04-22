@@ -23,7 +23,7 @@ def base62_encode(url_id) -> str:
 #     return url_id
 
 
-def query_next_unique_id(full_url) -> str:
+def get_next_unique_id(full_url) -> str:
     def get_final_id(init_id, digit):
         final_id = ""
         while digit > 0:
