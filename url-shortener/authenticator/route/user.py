@@ -42,7 +42,7 @@ def create_user():
         raise BadRequest("Invalid payload.")
 
     if is_user_exist(user.username):
-        raise Conflict("The user with same username already existed.")
+        raise Conflict("The user already existed.")
 
     add_user(user.username, user.password)
 
