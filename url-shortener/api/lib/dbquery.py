@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from dbmodel import db, url_mapper, url_mapper_schema, url_user_mapper
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from model.error import InternalServer
-from lib.shortener import base62_encode, get_next_unique_id
+from lib.shortener import get_next_unique_id
 
 
 def create_short_url(full_url, user_id) -> dict:
@@ -20,17 +20,15 @@ def create_short_url(full_url, user_id) -> dict:
         full_url : full url which was passed as input
     """
     next_unique_id = get_next_unique_id(full_url)
-    # short_url_id = base62_encode(url_id=next_unique_id)
     # add url mapping
     new_url = url_mapper(
-        # url_id=next_unique_id,
         short_url_id=next_unique_id,
         full_url=full_url,
     )
     db.session.add(new_url)
     db.session.commit()
     # add user and url mapping
-    url_id, = db.session.query(url_mapper.url_id).first()
+    url_id, = db.session.query(url_mapper.url_id).filter_by(short_url_id=next_unique_id).first()
     new_url_user = url_user_mapper(url_id=url_id, user_id=user_id)
     db.session.add(new_url_user)
     db.session.commit()
@@ -56,7 +54,7 @@ def delete_short_url(short_url_id) -> str:
     returns:
         short url id
     """
-    db.session.query(url_mapper).fileter_by(short_url_id=short_url_id).delete()
+    db.session.query(url_mapper).filter_by(short_url_id=short_url_id).delete()
     db.session.commit()
 
     return short_url_id
