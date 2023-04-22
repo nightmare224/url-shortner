@@ -14,4 +14,4 @@ class UserSchema(Schema):
     # deserialization
     @post_load
     def __post_load__(self, data, **kwargs):
-        return FullURL(**data)
+        return User(**data)

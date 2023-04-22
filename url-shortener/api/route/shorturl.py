@@ -4,12 +4,13 @@ from model.url import FullURL, URL
 from schema.shorturl import ShortURLSchema
 from schema.url import FullURLSchema, URLSchema
 from model.error import BadRequest, NotFound, InternalServer
-from shortner import query_url_mapping, create_short_url, is_full_url_not_found
+from lib.dbquery import query_url_mapping, create_short_url, is_full_url_not_found
+from lib.authenticator import require_login, decode_token
 
 shorturl_restapi = Blueprint("shorturl_restapi", __name__)
 
-
 @shorturl_restapi.route("/", methods=["GET"])
+@require_login
 def get_short_url_api():
     """
     Get all shorten URL.
@@ -17,6 +18,12 @@ def get_short_url_api():
     tags:
       - Short URL APIs
     description: Get all URL information.
+    parameters:
+      - in: header
+        name: Authorization
+        required: true
+        type: string
+        description: The format is `Bearer <access_token>`.
     responses:
         200:
             description: Get a list of URL information.
@@ -25,8 +32,12 @@ def get_short_url_api():
                 items:
                     $ref: '#/definitions/URL'
     """
+    # get user_id from token
+    _, token_payload, _ = decode_token()
+    user_id = token_payload["sub"]
+
     payload = []
-    url_mapping_all = query_url_mapping()
+    url_mapping_all = query_url_mapping(user_id = user_id)
     for url_mapping in url_mapping_all:
         url = URL(
             short_url_id=url_mapping["short_url_id"],
@@ -39,6 +50,7 @@ def get_short_url_api():
 
 
 @shorturl_restapi.route("/", methods=["POST"])
+@require_login
 def create_short_url_api():
     """
     Create shorten URL by passing a full URL in the payload.
@@ -47,6 +59,11 @@ def create_short_url_api():
       - Short URL APIs
     description: Create shorten URL by passing a full URL in the payload.
     parameters:
+      - in: header
+        name: Authorization
+        required: true
+        type: string
+        description: The format is `Bearer <access_token>`.
       - name: FullURL
         in: body
         schema:
@@ -65,11 +82,15 @@ def create_short_url_api():
     except:
         raise BadRequest("Invalid payload.")
 
+    # get user_id from token
+    _, token_payload, _ = decode_token()
+    user_id = token_payload["sub"]
+
     # the mapping of full url to short url already existed
-    if not is_full_url_not_found(full_url.full_url):
+    if not is_full_url_not_found(full_url.full_url, user_id):
         raise BadRequest("The URL already has short URL.")
 
-    url_mapping = create_short_url(full_url.full_url)
+    url_mapping = create_short_url(full_url.full_url, user_id)
     data = ShortURL(
         short_url_id=url_mapping["short_url_id"],
         short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",

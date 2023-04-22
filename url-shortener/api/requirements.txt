@@ -13,3 +13,4 @@ Flask-SQLAlchemy==3.0.3
 psycopg2-binary
 marshmallow-sqlalchemy
 gunicorn==20.1.0
+pycryptodome==3.17

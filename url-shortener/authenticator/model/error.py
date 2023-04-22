@@ -6,12 +6,28 @@ class BadRequest(Exception):
             "error": str(message) if message else "400 Bad Request."
         }
 
+class Forbidden(Exception):
+    status_code = 403
+    def __init__(self, message=None):
+        super().__init__()
+        self.payload = {
+            "error": str(message) if message else "403 Forbidden."
+        }
+
 class NotFound(Exception):
     status_code = 404
     def __init__(self, message=None):
         super().__init__()
         self.payload = {
             "error": str(message) if message else "404 Not Found."
+        }
+
+class Conflict(Exception):
+    status_code = 409
+    def __init__(self, message=None):
+        super().__init__()
+        self.payload = {
+            "error": str(message) if message else "409 Conflict."
         }
 
 class InternalServer(Exception):
