@@ -21,7 +21,7 @@ def create_short_url(full_url, user_id) -> dict:
         full_url : full url which was passed as input
     """
     short_base_url = os.environ.get("BASE_URL_FOR_SHORT_URL")
-    next_unique_id = query_next_unique_id()
+    next_unique_id = query_next_unique_id(full_url)
     short_url_id = base62_encode(url_id=next_unique_id)
     # add url mapping
     new_url = url_mapper(
