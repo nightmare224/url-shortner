@@ -1,4 +1,5 @@
 from dbmodel import db, url_mapper
+from uuid import uuid5, NAMESPACE_URL
 
 def base62_encode(url_id) -> str:
     base62_values = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -22,13 +23,22 @@ def base62_decode(short_url_id) -> int:
     return url_id
 
 
-def query_next_unique_id() -> int:
+def query_next_unique_id(full_url) -> int:
+    def get_final_id(init_id, digit):
+        init_id = str(init_id)
+        final_id = ""
+        while digit > 0:
+            this_round_digit = len(init_id) if len(init_id) < digit else digit
+            final_id += init_id[:this_round_digit]
+            digit -= this_round_digit
+        return int(final_id)
+    
+    digit = 1
+    init_id = uuid5(NAMESPACE_URL, full_url).int
+    final_id = get_final_id(init_id, digit)
     result = db.session.query(url_mapper.url_id).all()
     id_set = set([id[0] for id in result])
-    id_next = 0
-    for i in range(len(id_set)):
-        if id_next not in id_set:
-            break
-        else:
-            id_next += 1
-    return id_next
+    while final_id in id_set:
+        digit += 1
+        final_id = get_final_id(init_id, digit)
+    return final_id
