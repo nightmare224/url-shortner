@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, jsonify, request
 from model.url import FullURL, URL
 from model.shorturl import ShortURL
@@ -55,9 +56,10 @@ def get_url(short_url_id):
         raise NotFound("Short URL ID not found.")
 
     url_mapping = query_url_mapping(short_url_id=short_url_id, user_id=user_id)
+    short_base_url = os.environ.get("BASE_URL_FOR_SHORT_URL")
     url = URL(
         short_url_id=url_mapping["short_url_id"],
-        short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+        short_url=f"{short_base_url}/{url_mapping['short_url_id']}",
         full_url=url_mapping["full_url"]
     )
 
@@ -126,9 +128,10 @@ def update_url(short_url_id):
 
     # query the update result
     url_mapping = query_url_mapping(full_url=full_url.full_url, user_id=user_id)
+    short_base_url = os.environ.get("BASE_URL_FOR_SHORT_URL")
     url = URL(
         short_url_id=url_mapping["short_url_id"],
-        short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+        short_url=f"{short_base_url}/{url_mapping['short_url_id']}",
         full_url = url_mapping["full_url"]
     )
 

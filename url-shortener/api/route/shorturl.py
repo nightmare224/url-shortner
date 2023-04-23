@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, request
 from model.shorturl import ShortURL
 from model.url import FullURL, URL
@@ -40,10 +41,11 @@ def get_short_url_api():
 
     payload = []
     url_mapping_all = query_url_mapping(user_id = user_id)
+    short_base_url = os.environ.get("BASE_URL_FOR_SHORT_URL")
     for url_mapping in url_mapping_all:
         url = URL(
             short_url_id=url_mapping["short_url_id"],
-            short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+            short_url=f"{short_base_url}/{url_mapping['short_url_id']}",
             full_url=url_mapping["full_url"]
         )
         payload.append(URLSchema().dump(url))
@@ -95,9 +97,10 @@ def create_short_url_api():
         raise BadRequest("The URL already has short URL.")
 
     url_mapping = create_short_url(full_url.full_url, user_id)
+    short_base_url = os.environ.get("BASE_URL_FOR_SHORT_URL")
     data = ShortURL(
         short_url_id=url_mapping["short_url_id"],
-        short_url=f"{url_mapping['short_base_url']}/{url_mapping['short_url_id']}",
+        short_url=f"{short_base_url}/{url_mapping['short_url_id']}",
     )
     
     payload = ShortURLSchema().dump(data)
@@ -105,6 +108,7 @@ def create_short_url_api():
 
 
 @shorturl_restapi.route("/", methods=["DELETE"])
+@require_login
 def delete_short_url_api():
     """
     Delete URL (no such method).
@@ -112,7 +116,15 @@ def delete_short_url_api():
     tags:
       - Short URL APIs
     description: Delete URL (no such method).
+    parameters:
+      - in: header
+        name: Authorization
+        required: true
+        type: string
+        description: The format is `Bearer <access_token>`.
     responses:
+        403:
+            description: Invalid access token.
         404:
             description: Delete method not found.
     """

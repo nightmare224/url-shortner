@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from dbmodel import db, url_mapper, url_mapper_schema, url_user_mapper
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from model.error import InternalServer
-from lib.shortener import base62_encode, base62_decode, query_next_unique_id
+from lib.shortener import get_next_unique_id
 
 
 def create_short_url(full_url, user_id) -> dict:
@@ -17,22 +17,19 @@ def create_short_url(full_url, user_id) -> dict:
         json response with following details:
         url_id : unique primary key [highest int]
         short_url_id : new generated short url [without domain]
-        short_base_url : Base url [domain name] for short url
         full_url : full url which was passed as input
     """
-    short_base_url = os.environ.get("BASE_URL_FOR_SHORT_URL")
-    next_unique_id = query_next_unique_id(full_url)
-    short_url_id = base62_encode(url_id=next_unique_id)
+    next_unique_id = get_next_unique_id(full_url)
     # add url mapping
     new_url = url_mapper(
-        url_id=next_unique_id,
-        short_url_id=short_url_id,
-        short_base_url=short_base_url,
+        short_url_id=next_unique_id,
         full_url=full_url,
     )
     db.session.add(new_url)
+    db.session.commit()
     # add user and url mapping
-    new_url_user = url_user_mapper(url_id=next_unique_id, user_id=user_id)
+    url_id, = db.session.query(url_mapper.url_id).filter_by(short_url_id=next_unique_id).first()
+    new_url_user = url_user_mapper(url_id=url_id, user_id=user_id)
     db.session.add(new_url_user)
     db.session.commit()
 
@@ -45,6 +42,7 @@ def update_full_url(short_url_id, full_url):
         raise UnmappedInstanceError(f"No row found with short_url_id={short_url_id}")
     url_map.full_url = full_url
     db.session.commit()
+
     return short_url_id
 
 
@@ -56,10 +54,9 @@ def delete_short_url(short_url_id) -> str:
     returns:
         short url id
     """
-    url_id = base62_decode(short_url_id=short_url_id)
-    to_delete = url_mapper.query.get(url_id)
-    db.session.delete(to_delete)
+    db.session.query(url_mapper).filter_by(short_url_id=short_url_id).delete()
     db.session.commit()
+
     return short_url_id
 
 
