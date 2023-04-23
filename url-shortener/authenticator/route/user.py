@@ -63,10 +63,10 @@ def update_user():
             $ref: '#/definitions/UserPwd'
     description: Create a new user with username and password.
     responses:
-        201:
-            description: Create new user success.
-        409:
-            description: The user already existed.
+        200:
+            description: Update user password success.
+        403:
+            description: Invalid username or password.
     """
     try:
         request_data = request.get_json()
