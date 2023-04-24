@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: url-shortner/api
+        working-directory: url-shortener/api
 
     steps:
       - uses: actions/checkout@v3
@@ -26,13 +26,11 @@ jobs:
       - name: Push image
         run: docker push $DOCKER_USER/api:latest
 
-  build-web:
+  build-authenticator:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: url-shortner/authenticator
-
-
+        working-directory: url-shortener/authenticator
     steps:
       - uses: actions/checkout@v3
       - name: Docker image for authenticator
@@ -46,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/db
+        working-directory: url-shortener/db
 
     steps:
       - uses: actions/checkout@v3
