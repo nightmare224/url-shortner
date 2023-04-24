@@ -1,5 +1,5 @@
 # url-shortener
-URL shortener for UVA project
+This is a URL shortener service for UvA project. There are three microservices in the system, which is *api-service*, *authenticator-service*, and *database*. The users need to provide a valid access token in the HTTP Authorization header when requesting every API in *api-service*, which the access token can be obtained through the *authenticator-service*. Both *api-service* and *authenticator-service* would access *database* to store and load the user information and the short and full URL mapping.
 
 ## Quick Started
 
@@ -27,7 +27,7 @@ To install url-shortener service, follow the below steps:
 
 ### Usage
 
-See and interact with RESTful APIs on **http://127.0.0.1:5001/apidocs/**
+See and interact with RESTful APIs on **http://127.0.0.1:5001/apidocs/** for *api-service* and **http://127.0.0.1:5002/apidocs/** for *authenticator-service*.
 
 
 
@@ -35,16 +35,21 @@ See and interact with RESTful APIs on **http://127.0.0.1:5001/apidocs/**
 
 ### Docker environment variable configuration
 
-If you want your url-shortener service run on different port, configure the environment variable in `url-shortener/url-shortener/.env` file. Also, you can modify the database password and the base URL in this file. The default configuration is shown as below.
+If you want your url-shortener service run on different port, configure the environment variable in `url-shortener/url-shortener/.env` file. Also, you can modify the database password, the base URL, and the lifespan of access token in this file. The default configuration is shown as below.
 
 ```ini
 DATABASE_NAME=postgres
 DATABASE_USER=postgresadmin
 DATABASE_PASSWORD=admin123
 DATABASE_PORT=5432
+
 API_PORT=5001
 API_DEBUG=True
 BASE_URL_FOR_SHORT_URL=https://snv.io
+
+AUTHENTICATOR_PORT=5002
+AUTHENTICATOR_DEBUG=True
+ACCESS_TOKEN_LIFESPAN=3600
 ```
 
 
@@ -54,3 +59,5 @@ BASE_URL_FOR_SHORT_URL=https://snv.io
 - Our application refer to [this structure](https://auth0.com/blog/best-practices-for-flask-api-development/), as we consider it as properly structure.
 
 - The error handle of our application for 400 and 404 exceptions refer to [Blueprint Error Handlers](https://flask.palletsprojects.com/en/2.2.x/errorhandling/#blueprint-error-handlers) in Flask official document.
+
+- The token signature refer to [rsa-sign-verify-example](https://cryptobook.nakov.com/digital-signatures/rsa-sign-verify-examples)
