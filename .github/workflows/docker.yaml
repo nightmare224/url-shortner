@@ -18,7 +18,7 @@ jobs:
         working-directory: url-shortner/api
 
     steps:
-      - uses: actions/urlshortner@v2
+      - uses: actions/url-shortner@v2
       - name: Docker Image for API
         run: docker build . --file Dockerfile --tag $DOCKER_USER/api:latest
       - name: Docker login
@@ -34,7 +34,7 @@ jobs:
 
 
     steps:
-      - uses: actions/urlshortner@v2
+      - uses: actions/url-shortner@v2
       - name: Docker image for authenticator
         run: docker build . --file Dockerfile --tag $DOCKER_USER/authenticator:latest
       - name: Docker login
@@ -49,7 +49,7 @@ jobs:
         working-directory: services/db
 
     steps:
-      - uses: actions/urlshortner@v2
+      - uses: actions/url-shortner@v2
       - name: Docker image for DB
         run: docker build . --file Dockerfile --tag $DOCKER_USER/db:latest
       - name: Docker login
