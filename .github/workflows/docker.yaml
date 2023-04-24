@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker Image for API
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/api:${GITHUB_SHA}
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/api:${GITHUB_SHA::7}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker image for authenticator
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/authenticator:${GITHUB_SHA}
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/authenticator:${GITHUB_SHA::7}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
