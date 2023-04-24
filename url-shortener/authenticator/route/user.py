@@ -52,7 +52,7 @@ def create_user():
 @user_restapi.route("/users", methods=["PUT"])
 def update_user():
     """
-    Create a new user with username and password.
+    Update the user password.
     ---
     tags:
       - Users APIs
