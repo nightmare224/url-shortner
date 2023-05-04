@@ -1,0 +1,6 @@
+[master]
+k8s-master ansible_host=145.100.135.169 ansible_user=student169 ansible_password=eideGoe4kooceema
+
+[worker]
+k8s-worker1 ansible_host=145.100.135.170 ansible_user=student170 ansible_password=ef8OH7lu6Ohghow7
+k8s-worker2 ansible_host=145.100.135.171 ansible_user=student171 ansible_password=phah9su5Aib8oovi
