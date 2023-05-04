@@ -15,9 +15,9 @@
   become_user: "{{ ansible_user }}"
 
 # Before Deploy, Need to Transfer deploy file to Master Node
-- name: Transfer {{ service_path }} to master
+- name: Transfer {{ service_name }} to master
   synchronize:
-    src: "{{ service_path }}"
+    src: "{{ service_type }}/{{ service_name }}"
     dest: /home/{{ ansible_user }}/k8s/deployment
 
 - name: Change file permissions
