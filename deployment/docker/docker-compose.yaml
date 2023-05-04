@@ -2,7 +2,7 @@ version: "3.8"
 services:
   db:
     container_name: db
-    build: ./db
+    build: ./src/db
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USER}
@@ -20,7 +20,7 @@ services:
     restart: always
   authenticator-service:
     container_name: authenticator-service
-    build: ./authenticator
+    build: ./src/authenticator
     environment:
       SQLALCHEMY_DATABASE_URI: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:${DATABASE_PORT}/${DATABASE_NAME}
       SQLALCHEMY_TRACK_MODIFICATIONS: 'false'
@@ -34,7 +34,7 @@ services:
         condition: service_healthy
   api-service:
     container_name: api-service
-    build: ./api
+    build: ./src/api
     environment:
       SQLALCHEMY_DATABASE_URI: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:${DATABASE_PORT}/${DATABASE_NAME}
       SQLALCHEMY_TRACK_MODIFICATIONS: 'false'
