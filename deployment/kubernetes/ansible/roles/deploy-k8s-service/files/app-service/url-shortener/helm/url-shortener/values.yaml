@@ -70,26 +70,20 @@ authenticator:
   replicaCount: 3
 
   image:
-    repository: nightmare224/anime-reminder-authenticator
+    repository: nightmare224/url-shortener-authenticator
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
 
   imagePullSecrets: []
-  
-  serviceAccount:
-    # Specifies whether a service account should be created
-    create: true
-    # Annotations to add to the service account
-    annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
+
+  containers:
+    authenticator:
+      port: 5002
 
   service:
     type: ClusterIP
     port: 80
-    # default is None
     sessionAffinity: ClientIP
 
   resources: {}
@@ -121,6 +115,9 @@ authenticator:
   podSecurityContext: {}
 
   securityContext: {}
+
+  accessToken:
+    lifespan: 3600
 
   # extraEnvFrom: |
   #   - secretRef: 
@@ -160,6 +157,10 @@ ingress:
     - path: /
       pathType: Prefix
       serviceName: us-api
+      servicePort: 80
+    - path: /users
+      pathType: Prefix
+      serviceName: us-authenticator
       servicePort: 80
   # hosts:
   #   - host: snv.io

@@ -62,17 +62,17 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "url-shortener.api.serviceAccountName" -}}
-{{- if .Values.ui.serviceAccount.create }}
+{{- if .Values.api.serviceAccount.create }}
 {{- default (include "url-shortener.api" .) .Values.ui.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.ui.serviceAccount.name }}
+{{- default "default" .Values.api.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
 {{- define "url-shortener.authenticator.serviceAccountName" -}}
-{{- if .Values.api.serviceAccount.create }}
+{{- if .Values.authenticator.serviceAccount.create }}
 {{- default (include "url-shortener.authenticator" .) .Values.api.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.api.serviceAccount.name }}
+{{- default "default" .Values.authenticator.serviceAccount.name }}
 {{- end }}
 {{- end }}
