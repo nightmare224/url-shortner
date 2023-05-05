@@ -24,7 +24,7 @@ jobs:
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
-        run: docker push $DOCKER_USER/api:${GITHUB_SHA::7}
+        run: docker push $DOCKER_USER/url-shortener-api:${GITHUB_SHA::7}
 
 
   build-authenticator:
@@ -39,7 +39,7 @@ jobs:
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
-        run: docker push $DOCKER_USER/authenticator:${GITHUB_SHA::7}
+        run: docker push $DOCKER_USER/url-shortener-authenticator:${GITHUB_SHA::7}
 
 
 
@@ -57,7 +57,7 @@ jobs:
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
-        run: docker push $DOCKER_USER/db:${GITHUB_SHA::7}
+        run: docker push $DOCKER_USER/url-shortener-db:${GITHUB_SHA::7}
 
 
 

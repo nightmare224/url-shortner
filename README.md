@@ -38,7 +38,7 @@ See and interact with RESTful APIs on **http://127.0.0.1:5001/apidocs/** for *ap
 If you want your url-shortener service run on different port, configure the environment variable in `url-shortener/url-shortener/.env` file. Also, you can modify the database password, the base URL, and the lifespan of access token in this file. The default configuration is shown as below.
 
 ```ini
-DATABASE_NAME=postgres
+DATABASE_NAME=url_shortener
 DATABASE_USER=postgresadmin
 DATABASE_PASSWORD=admin123
 DATABASE_PORT=5432
