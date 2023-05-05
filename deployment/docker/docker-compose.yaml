@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  db:
+    container_name: db
+    build: ./src/db
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      PGDATABASE: ${DATABASE_NAME}
+      PGUSER: ${DATABASE_USER}
+      PGPASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --timeout=5"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
+  authenticator-service:
+    container_name: authenticator-service
+    build: ./src/authenticator
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:${DATABASE_PORT}/${DATABASE_NAME}
+      SQLALCHEMY_TRACK_MODIFICATIONS: 'false'
+      AUTHENTICATOR_PORT: ${AUTHENTICATOR_PORT}
+      AUTHENTICATOR_DEBUG: ${AUTHENTICATOR_DEBUG}
+      ACCESS_TOKEN_LIFESPAN: ${ACCESS_TOKEN_LIFESPAN}
+    ports:
+      - "${AUTHENTICATOR_PORT}:${AUTHENTICATOR_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+  api-service:
+    container_name: api-service
+    build: ./src/api
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:${DATABASE_PORT}/${DATABASE_NAME}
+      SQLALCHEMY_TRACK_MODIFICATIONS: 'false'
+      API_PORT: ${API_PORT}
+      API_DEBUG: ${API_DEBUG}
+      BASE_URL_FOR_SHORT_URL: ${BASE_URL_FOR_SHORT_URL}
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
