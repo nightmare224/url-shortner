@@ -24,7 +24,7 @@ jobs:
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
-        run: docker push $DOCKER_USER/url-shortener-api:latest
+        run: docker push --all-tags $DOCKER_USER/url-shortener-api
 
 
   build-authenticator:
@@ -56,8 +56,7 @@ jobs:
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
-        run: docker push $DOCKER_USER/url-shortener-db:latest
-
+        run: docker push --all-tags $DOCKER_USER/url-shortener-db
 
 
 

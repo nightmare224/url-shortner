@@ -30,9 +30,19 @@ spec = APISpec(
     plugins=[
         FlaskPlugin(),
         MarshmallowPlugin(),
-    ],
+    ]
 )
 template = spec.to_flasgger(app, definitions=[UserSchema, UserPwdSchema])
+app.config["SWAGGER"] = {
+    "static_url_path": "/users/flasgger_static",
+    "specs_route": "/users/apidocs/",
+    "specs": [
+        {
+            "endpoint": "apispec_1",
+            "route": "/users/apispec_1.json",
+        }
+    ],
+}
 swagger = Swagger(app, template=template)
 
 
