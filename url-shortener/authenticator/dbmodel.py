@@ -20,6 +20,7 @@ class UserInfoSchema(Schema):
 
 class jwks(db.Model):
     __tablename__ = "jwks"
+    __table_args__ = {'extend_existing': True}
     kid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     n = db.Column(db.String(1024), nullable=False)
     e = db.Column(db.String(1024), nullable=False)

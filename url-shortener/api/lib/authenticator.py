@@ -7,6 +7,8 @@ from base64 import urlsafe_b64decode
 from time import time
 from dbmodel import db, jwks
 import json
+import requests
+import os
 
 def require_login(func):
     @wraps(func)
@@ -30,13 +32,20 @@ def verify_token(token = None):
 
     # get hash value from signature and public key
     header, payload, signature = decode_token(access_token)
-    # get public key
-    jwk = db.session.query(jwks).filter_by(kid=int(header["kid"])).scalar()
+
+    # get public key from authenticator well know endpoint
+    resp = requests.get(f'http://{os.environ.get("AUTHENTICATOR_ENDPOINT")}:{os.environ.get("AUTHENTICATOR_PORT")}/auth/.well-known/configuration')
+    jwks = resp.json()
+    jwk = None
+    for data in jwks:
+        if header["kid"] == data["kid"]:
+            jwk = data
+            break
     # kid not found
     if jwk is None:
         return False
-    e = int.from_bytes(urlsafe_b64decode(fill_b64_padding(jwk.e)), 'big')
-    n = int.from_bytes(urlsafe_b64decode(fill_b64_padding(jwk.n)), 'big')
+    e = int.from_bytes(urlsafe_b64decode(fill_b64_padding(jwk["e"])), 'big')
+    n = int.from_bytes(urlsafe_b64decode(fill_b64_padding(jwk["n"])), 'big')
     hash_from_signature = pow(signature, e, n)
     # verify signature
     if hash != hash_from_signature:
