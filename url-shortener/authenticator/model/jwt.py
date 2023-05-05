@@ -21,3 +21,12 @@ class JWTPayload():
 class JWT():
     payload: JWTPayload
     header: JWTHeader
+
+@dataclass
+class JWK():
+    n: str
+    e: str
+    kid: str
+    alg: str = "RS1024"
+    kty: str = "RSA"
+    use: str = "sig"

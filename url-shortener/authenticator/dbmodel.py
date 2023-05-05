@@ -25,3 +25,10 @@ class jwks(db.Model):
     e = db.Column(db.String(1024), nullable=False)
     d = db.Column(db.String(1024), nullable=False)
     create_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+class JWKSSchema(Schema):
+    kid = fields.Integer()
+    n = fields.String()
+    e = fields.String()
+    d = fields.String()
+    create_date = fields.DateTime()

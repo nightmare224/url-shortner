@@ -2,8 +2,8 @@ import json
 from hashlib import sha512
 from base64 import urlsafe_b64encode,urlsafe_b64decode
 from Crypto.PublicKey import RSA
-from marshmallow import Schema, fields, post_dump
-from model.jwt import JWTHeader, JWTPayload
+from marshmallow import Schema, fields, post_dump, post_load
+from model.jwt import JWTHeader, JWTPayload, JWK
 from dbmodel import db, jwks
 
 class JWTHeaderSchema(Schema):
@@ -62,3 +62,16 @@ class JWTSchema(Schema):
         signature_b64 = urlsafe_b64encode(signature_binary).decode("utf-8").replace("=", "")
 
         return {"access_token": f"{header_b64}.{payload_b64}.{signature_b64}"}
+
+class JWKSchema(Schema):
+    n = fields.String()
+    e = fields.String()
+    kid = fields.String()
+    alg = fields.String()
+    kty = fields.String()
+    use = fields.String()
+
+    # deserialization
+    @post_load
+    def __post_load__(self, data, **kwargs):
+        return JWK(**data)

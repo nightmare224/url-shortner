@@ -1,5 +1,5 @@
 from Crypto.PublicKey import RSA
-from dbmodel import db, jwks
+from dbmodel import db, jwks, JWKSSchema
 from base64 import urlsafe_b64encode
 
 # filepath=os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +19,14 @@ def query_latest_kid() -> str:
     jwk = db.session.query(jwks).order_by(jwks.create_date.desc()).first()
 
     return str(jwk.kid)
+
+def query_jwks() -> list:
+    result = []
+    kid_list = db.session.query(jwks.kid).all()
+    for kid in kid_list:
+        jwk = jwks.query.get(kid)
+        result.append(JWKSSchema().dump(jwk))
+    return result
 
 def generate_jwk():
     def encode(val: int):
