@@ -18,6 +18,10 @@ services:
       timeout: 5s
       retries: 3
     restart: always
+    volumes:
+      - urlshortner-data:/data/db
+
+
   authenticator-service:
     container_name: authenticator-service
     build: ./src/authenticator
@@ -32,6 +36,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  
   api-service:
     container_name: api-service
     build: ./src/api
@@ -46,3 +51,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+volumes:
+  urlshortner-data:
