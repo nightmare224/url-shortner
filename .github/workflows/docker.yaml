@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker image for authenticator
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:${GITHUB_SHA::7} $DOCKER_USER/url-shortener-authenticator:$latest
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:${GITHUB_SHA::7} $DOCKER_USER/url-shortener-authenticator:latest
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image

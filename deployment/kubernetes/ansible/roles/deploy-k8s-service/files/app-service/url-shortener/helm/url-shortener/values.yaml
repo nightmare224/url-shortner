@@ -1,0 +1,174 @@
+# Default values for anime-reminder.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+fullnameOverride: ""
+nameOverride: ""
+
+api:
+  replicaCount: 3
+
+  image:
+    repository: nightmare224/url-shortener-api
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+
+  imagePullSecrets: []
+
+  containers:
+    api:
+      port: 5001
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  resources: {}
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 100%
+
+  autoscaling:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  healthCheck:
+    enabled: false
+
+  # extraEnvFrom: |
+  #   - secretRef: 
+  #       name: url-shortener-common
+
+  # devMode:
+  #   enabled: false
+  #   codePathOfLocal: /home/thl/Documents/softwareContainerization/final-project/app-service/anime-reminder/app/ui/src
+  #   codePathOfPod: /opt/src
+
+  # canary:
+  #   enabled: false
+  #   replicaCount: 1
+  #   image:
+  #     repository: nightmare224/anime-reminder-ui
+  #     tag: "1.0.1"
+
+
+authenticator:
+  replicaCount: 3
+
+  image:
+    repository: nightmare224/anime-reminder-authenticator
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+
+  imagePullSecrets: []
+  
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  service:
+    type: ClusterIP
+    port: 80
+    # default is None
+    sessionAffinity: ClientIP
+
+  resources: {}
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 100%
+
+  autoscaling:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  healthCheck:
+    enabled: false
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext: {}
+
+  # extraEnvFrom: |
+  #   - secretRef: 
+  #       name: anime-reminder-common
+
+  # devMode:
+  #   enabled: false
+  #   codePathOfLocal: /home/thl/Documents/softwareContainerization/final-project/app-service/anime-reminder/app/api/src
+  #   codePathOfPod: /opt/src
+
+  # canary:
+  #   enabled: false
+  #   replicaCount: 1
+  #   image:
+  #     repository: nightmare224/anime-reminder-api
+  #     tag: "latest"
+
+
+postgresql:
+  replicaCount: 3
+  enabled: true
+  auth:
+    username: postgresadmin
+    password: "admin123"
+    database: url_shortener
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 128k
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/affinity-mode: persistent
+  host: snv.io
+  paths:
+    - path: /
+      pathType: Prefix
+      serviceName: us-api
+      servicePort: 80
+  # hosts:
+  #   - host: snv.io
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix
+  #         serviceName: us-api
+  #         servicePort: 80
+  # tls:
+  #   - secretName: anime-reminder-tls-secret
+  #     hosts:
+  #       - sc23.group40.io

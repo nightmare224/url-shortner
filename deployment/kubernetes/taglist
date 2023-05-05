@@ -1,4 +1,4 @@
 [x] k8s
-[v] monitor-service
+[x] monitor-service
 [x] infra-service
-[x] app-service
+[v] app-service

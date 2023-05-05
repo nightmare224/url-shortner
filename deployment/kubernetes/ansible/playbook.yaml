@@ -38,24 +38,24 @@
     - { role: deploy-k8s-service, service_name: k9s, service_type: monitor-service, become: yes }
   tags: monitor-service
 
-# - name: Install service requirement # Install open-iscsi nfs-common
-#   hosts: all
-#   roles:
-#     - { role: service-requirement, become: yes }
-#   tags: infra-service
+- name: Install service requirement
+  hosts: all
+  roles:
+    - { role: service-requirement, become: yes }
+  tags: infra-service
 
 - name: Deploy infra service
   hosts: master
   roles:
     - { role: deploy-k8s-service, service_name: calico, service_type: infra-service }
 #     - { role: deploy-k8s-service, service_name: metallb, service_path: ../../infra-service/metallb }
-#     - { role: deploy-k8s-service, service_name: ingress-nginx, service_path: ../../infra-service/ingress-nginx }
-#     - { role: deploy-k8s-service, service_name: longhorn, service_path: ../../infra-service/longhorn }
+    - { role: deploy-k8s-service, service_name: ingress-nginx, service_type: infra-service }
+    - { role: deploy-k8s-service, service_name: longhorn, service_type: infra-service }
 #     - { role: deploy-k8s-service, service_name: cert-manager, service_path: ../../infra-service/cert-manager }
   tags: infra-service
 
-# - name: Deploy app service
-#   hosts: master
-#   roles:
-#     - { role: deploy-service, service_name: anime-reminder, service_path: ../../app-service/anime-reminder }
-#   tags: app-service
+- name: Deploy app service
+  hosts: master
+  roles:
+    - { role: deploy-k8s-service, service_name: url-shortener, service_type: app-service }
+  tags: app-service
