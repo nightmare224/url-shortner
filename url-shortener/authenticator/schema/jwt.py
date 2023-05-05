@@ -49,7 +49,8 @@ class JWTSchema(Schema):
             .decode("utf-8")
             .replace("=", "")
         )
-        # # read key
+        
+        # read key
         jwk = db.session.query(jwks).order_by(jwks.create_date.desc()).first()
         n = int.from_bytes(urlsafe_b64decode(fill_b64_padding(jwk.n)), 'big')
         d = int.from_bytes(urlsafe_b64decode(fill_b64_padding(jwk.d)), 'big')

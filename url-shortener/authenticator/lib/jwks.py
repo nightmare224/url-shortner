@@ -1,8 +1,6 @@
-import os
 from Crypto.PublicKey import RSA
 from dbmodel import db, jwks
 from base64 import urlsafe_b64encode
-from datetime import datetime
 
 # filepath=os.path.dirname(os.path.abspath(__file__))
 
@@ -15,6 +13,12 @@ from datetime import datetime
 
 def is_jwk_available():
     return db.session.query(jwks).first() is not None
+
+def query_latest_kid() -> str:
+    # read key
+    jwk = db.session.query(jwks).order_by(jwks.create_date.desc()).first()
+
+    return str(jwk.kid)
 
 def generate_jwk():
     def encode(val: int):

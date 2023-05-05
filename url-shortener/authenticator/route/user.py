@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from model.user import User
-from model.jwt import JWTPayload, JWT
+from model.jwt import JWTHeader, JWTPayload, JWT
 from model.error import BadRequest, NotFound, Conflict, Forbidden
 from schema.user import UserSchema, UserPwdSchema
 from schema.jwt import JWTSchema
@@ -12,6 +12,7 @@ from lib.dbquery import (
     query_user_info,
     update_user_password,
 )
+from lib.jwks import query_latest_kid
 
 user_restapi = Blueprint("user_restapi", __name__)
 
@@ -120,6 +121,9 @@ def login_user():
 
     # retrieve user info
     user_info = query_user_info(user.username)
-    jwt = JWT(payload=JWTPayload(sub=user_info["user_id"]))
+    jwt = JWT(
+        header=JWTHeader(kid=query_latest_kid()),
+        payload=JWTPayload(sub=user_info["user_id"]),
+    )
     payload = JWTSchema().dump(jwt)
     return jsonify(payload), 200
