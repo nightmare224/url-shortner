@@ -12,8 +12,8 @@ from lib.jwks import generate_jwk, is_jwk_available
 app = Flask(__name__, instance_relative_config=True)
 
 app.config.from_mapping(
-    SQLALCHEMY_DATABASE_URI="postgresql://postgres:efreet224@localhost:5432/postgres",
-    # SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DATABASE_URI"),
+    # SQLALCHEMY_DATABASE_URI="postgresql://postgres:efreet224@localhost:5432/postgres",
+    SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DATABASE_URI"),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
 )
 db.app = app
