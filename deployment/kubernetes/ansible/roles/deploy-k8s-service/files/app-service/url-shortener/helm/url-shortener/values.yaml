@@ -1,4 +1,4 @@
-# Default values for anime-reminder.
+# Default values for url-shortener.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -48,22 +48,6 @@ api:
 
   healthCheck:
     enabled: false
-
-  # extraEnvFrom: |
-  #   - secretRef: 
-  #       name: url-shortener-common
-
-  # devMode:
-  #   enabled: false
-  #   codePathOfLocal: /home/thl/Documents/softwareContainerization/final-project/app-service/anime-reminder/app/ui/src
-  #   codePathOfPod: /opt/src
-
-  # canary:
-  #   enabled: false
-  #   replicaCount: 1
-  #   image:
-  #     repository: nightmare224/anime-reminder-ui
-  #     tag: "1.0.1"
 
 
 authenticator:
@@ -119,25 +103,8 @@ authenticator:
   accessToken:
     lifespan: 3600
 
-  # extraEnvFrom: |
-  #   - secretRef: 
-  #       name: anime-reminder-common
-
-  # devMode:
-  #   enabled: false
-  #   codePathOfLocal: /home/thl/Documents/softwareContainerization/final-project/app-service/anime-reminder/app/api/src
-  #   codePathOfPod: /opt/src
-
-  # canary:
-  #   enabled: false
-  #   replicaCount: 1
-  #   image:
-  #     repository: nightmare224/anime-reminder-api
-  #     tag: "latest"
-
 
 postgresql:
-  replicaCount: 3
   enabled: true
   auth:
     username: postgresadmin
@@ -162,14 +129,3 @@ ingress:
       pathType: Prefix
       serviceName: us-authenticator
       servicePort: 80
-  # hosts:
-  #   - host: snv.io
-  #     paths:
-  #       - path: /
-  #         pathType: Prefix
-  #         serviceName: us-api
-  #         servicePort: 80
-  # tls:
-  #   - secretName: anime-reminder-tls-secret
-  #     hosts:
-  #       - sc23.group40.io
