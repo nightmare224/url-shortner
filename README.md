@@ -172,54 +172,54 @@ ACCESS_TOKEN_LIFESPAN=3600
   In fact, all of our the service deployment is managed through [Helm Charts](https://helm.sh). Therefore, more configurable value can be found in the `values.yaml` file in the helm charts of each services. For example, you can configure the number of replica of url-shortener pod in `url-shortner/deployment/kubernetes/ansible/roles/deploy-k8s-service/files/app-service/url-shortener/helm/url-shortener/values.yaml` file.
 
   ```
-  url-shortener/												# source code of URL Shortener service
+  url-shortener/                         # source code of URL Shortener service
   
-  deployment/														
-  	docker/															# deploy script for doployment on Docker
-  	kubernetes/													# deploy script for deployment on Kuberentes
-  		run.sh
-  		taglist									
-  		ansible/
-  			hosts														# inventory file for target machine
-  			playbook.yaml
-  			roles/
-  				ansible-init/									# init connection between target machine and
-  																			# ansible node.
-  				helm/													# install Helm on master node.
-  				
-  				docker/												# install Docker Engine on all machines.
-  				
-  				k8s-install/									# install kubeadm, kubelet, kubectl on all machines
-  				
-  				k8s-master-init/							# init master node
-  				
-  				k8s-worker-init/							# join k8s cluster
-  				
-  				deploy-k8s-service/						
-  					tasks/
-  					files/
-  						app-services/							# contains the helm charts and deploy script of app-services
-  							url-shortener/
-                  helm/									# helm chart of url-shortener
-                    url-shortener/			
+  deployment/                            
+    docker/                              # deploy script for doployment on Docker
+    kubernetes/                          # deploy script for deployment on Kuberentes
+      run.sh
+      taglist                  
+      ansible/
+        hosts                            # inventory file for target machine
+        playbook.yaml
+        roles/
+          ansible-init/                  # init connection between target machine and
+                                         # ansible node.
+          helm/                          # install Helm on master node.
+          
+          docker/                        # install Docker Engine on all machines.
+          
+          k8s-install/                   # install kubeadm, kubelet, kubectl on all machines
+          
+          k8s-master-init/               # init master node
+          
+          k8s-worker-init/               # join k8s cluster
+          
+          deploy-k8s-service/            
+            tasks/
+            files/
+              app-services/              # contains the helm charts and deploy script of app-services
+                url-shortener/
+                  helm/                  # helm chart of url-shortener
+                    url-shortener/      
                       charts/
                       templates/
                       Chart.yaml
-                      values.yaml				# configure more values in this file
+                      values.yaml        # configure more values in this file
                   config.ini
                   deploy.sh
                   uninstall.sh
-  						
-  						infra-services/
-  							calico/
-  								helm/									# helm chart of calico
-  							ingress-nginx/
-  								helm/									# helm chart of calico
-  							longhorn/
-  								helm/									# helm chart of longhorn
-  						
-  						monitor-service/
-  							k9s/
+              
+              infra-services/
+                calico/
+                  helm/                  # helm chart of calico
+                ingress-nginx/
+                  helm/                  # helm chart of calico
+                longhorn/
+                  helm/                  # helm chart of longhorn
+              
+              monitor-service/
+                k9s/
   ```
 
   
