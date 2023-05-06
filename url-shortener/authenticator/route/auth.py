@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from lib.jwks import query_jwks
+from lib.jwks import query_jwks, generate_jwk
 from schema.jwt import JWKSchema
 from model.jwt import JWK
 
@@ -31,3 +31,18 @@ def get_auth_config():
 
     return jsonify(payload), 200
 
+@auth_restapi.route("/auth/jwk", methods=["POST"])
+def refresh_jwk():
+    """
+    Generate new Json Web Key.
+    ---
+    tags:
+      - Auth APIs
+    description: Generate new Json Web Key.
+    responses:
+        200:
+            description: Generate new key success.
+    """
+    generate_jwk()
+
+    return jsonify({"create": "success"}), 201
