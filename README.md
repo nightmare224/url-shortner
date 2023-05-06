@@ -169,7 +169,7 @@ ACCESS_TOKEN_LIFESPAN=3600
 
 - **Other configuration**
 
-  In fact, all of our the service deployment is managed through [Helm Charts](https://helm.sh). Therefore, more configurable value can be found in the `values.yaml` file in the helm charts of each services. For example, you can configure the number of replica of url-shortener pod in `url-shortner/deployment/kubernetes/ansible/roles/deploy-k8s-service/files/app-service/url-shortener/helm/url-shortener/values.yaml` file.
+  In fact, all of our the service deployment is managed through [Helm Charts](https://helm.sh). Therefore, more configurable value can be found in the `values.yaml` file in the helm charts of each services. For example, you can configure the number of replica of url-shortener pod in `url-shortner/deployment/kubernetes/ansible/roles/deploy-k8s-service/files/app-service/url-shortener/helm/url-shortener/values.yaml` file. The detail directory layout of our project is shown below.
 
   ```
   url-shortener/                         # source code of URL Shortener service
