@@ -4,6 +4,7 @@ from time import time
 
 @dataclass
 class JWTHeader():
+    kid: str
     alg: str = "RS1024"
     typ: str = "JWT"
 
@@ -19,4 +20,13 @@ class JWTPayload():
 @dataclass
 class JWT():
     payload: JWTPayload
-    header: JWTHeader = JWTHeader()
+    header: JWTHeader
+
+@dataclass
+class JWK():
+    n: str
+    e: str
+    kid: str
+    alg: str = "RS1024"
+    kty: str = "RSA"
+    use: str = "sig"

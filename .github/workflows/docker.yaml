@@ -20,11 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker Image for API
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-api:${GITHUB_SHA::7}
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-api:${GITHUB_SHA::7} --tag $DOCKER_USER/url-shortener-api:latest
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
-        run: docker push $DOCKER_USER/url-shortener-api:${GITHUB_SHA::7}
+        run: docker push --all-tags $DOCKER_USER/url-shortener-api
 
 
   build-authenticator:
@@ -35,11 +35,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker image for authenticator
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:${GITHUB_SHA::7}
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:${GITHUB_SHA::7} --tag $DOCKER_USER/url-shortener-authenticator:latest
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
-        run: docker push $DOCKER_USER/url-shortener-authenticator:${GITHUB_SHA::7}
+        run: docker push --all-tags $DOCKER_USER/url-shortener-authenticator
 
 
 
@@ -52,13 +52,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker image for DB
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-db:${GITHUB_SHA::7}
-
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-db:${GITHUB_SHA::7} --tag $DOCKER_USER/url-shortener-db:latest
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
-        run: docker push $DOCKER_USER/url-shortener-db:${GITHUB_SHA::7}
-
+        run: docker push --all-tags $DOCKER_USER/url-shortener-db
 
 
 

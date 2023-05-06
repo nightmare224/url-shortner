@@ -46,6 +46,7 @@
   with_items:
     - swap
     - none
+  when: kubeadm_has_installed.rc != 0
 
 - name: Disable swap
   command: swapoff -a

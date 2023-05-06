@@ -19,7 +19,7 @@ services:
       retries: 3
     restart: always
     volumes:
-      - urlshortner-data:/data/db
+      - urlshortner-data:/var/lib/postgresql/data
 
 
   authenticator-service:
@@ -45,6 +45,8 @@ services:
       SQLALCHEMY_TRACK_MODIFICATIONS: 'false'
       API_PORT: ${API_PORT}
       API_DEBUG: ${API_DEBUG}
+      AUTHENTICATOR_PORT: ${AUTHENTICATOR_PORT}
+      AUTHENTICATOR_ENDPOINT: ${AUTHENTICATOR_ENDPOINT}
       BASE_URL_FOR_SHORT_URL: ${BASE_URL_FOR_SHORT_URL}
     ports:
       - "${API_PORT}:${API_PORT}"
