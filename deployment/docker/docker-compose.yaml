@@ -19,7 +19,7 @@ services:
       retries: 3
     restart: always
     volumes:
-      - urlshortner-data:/data/db
+      - urlshortner-data:/var/lib/postgresql/data
 
 
   authenticator-service:
