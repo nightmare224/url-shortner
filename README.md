@@ -3,7 +3,7 @@ This is a URL shortener service for UvA project. There are three microservices i
 
 # Project Layout
 
-We provide two deployments methods for the URL shortener project. The first one is on **Docker**. The second one is on **Kubernetes**. The source code of url-shortener project is under `url-shortener/url-shortener/` directory. The deployment script is under `url-shortener/deployment/` directory. Below is the rough directory layout of our project.
+We provide two deployments methods for the URL shortener project. The first one is on **Docker**. The second one is on **Kubernetes**. The source code of url-shortener project is under `url-shortener/url-shortener/` directory. The deployment script for Docker (assignment 3.1) is under `url-shortener/deployment/docker` directory, and the deployment script for Kubernetes (assignment 3.2) is under `url-shortener/deployment/kubernetes` directory. Below is the rough directory layout of our project.
 
 ```
 url-shortener/
@@ -16,8 +16,8 @@ url-shortener/
                           # depoly url-shortener on Kubernetes. (assignment 3.2)
                           
   url-shortener/          # Contain the common source that would be used in both docker and kubernetes  
-    api/                  # The source code of api-service, include Docker
-    authenenticator/      # The source code of authenticator-service, include Dockerfile
+    api/                  # The source code of api-service, including Dockerfile
+    authenenticator/      # The source code of authenticator-service, including Dockerfile
     db/                   # The Dockerfile of database
     
 ```
