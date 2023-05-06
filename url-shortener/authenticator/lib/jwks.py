@@ -2,15 +2,6 @@ from Crypto.PublicKey import RSA
 from dbmodel import db, jwks, JWKSSchema
 from base64 import urlsafe_b64encode
 
-# filepath=os.path.dirname(os.path.abspath(__file__))
-
-# keypair = RSA.generate(bits=1024)
-# with open(f'{filepath}/public_key.pem', 'wb') as f:
-#     f.write(keypair.publickey().exportKey(format='PEM'))
-
-# with open(f'{filepath}/private_key.pem', 'wb') as f:
-#     f.write(keypair.exportKey(format='PEM'))
-
 def is_jwk_available():
     return db.session.query(jwks).first() is not None
 
