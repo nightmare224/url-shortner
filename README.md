@@ -1,9 +1,28 @@
 # url-shortener
 This is a URL shortener service for UvA project. There are three microservices in the system, which is *api-service*, *authenticator-service*, and *database*. The users need to provide a valid access token in the HTTP Authorization header when requesting every API in *api-service*, which the access token can be obtained through the *authenticator-service*. Both *api-service* and *authenticator-service* would access *database* to store and load the user information and the short and full URL mapping.
 
-# Getting Started
+# Project Layout
 
-We provide two deployments methods for the URL shortener project. The first one is on **Docker**. The second one is on **Kubernetes**.
+We provide two deployments methods for the URL shortener project. The first one is on **Docker**. The second one is on **Kubernetes**. The source code of url-shortener project is under `url-shortener/url-shortener/` directory. The deployment script is under `url-shortener/deployment/` directory. Below is the rough directory layout of our project.
+
+```
+url-shortener/
+  README.md
+  .github/                # The github workflow action. Build and push the docker image when commit.
+  
+  deployment/
+    docker/               # Contain the script to deploy url-shortener on Docker (assignment 3.1)
+    kubernetes/           # Contain the Ansible script to deploy Kubernetes cluster and
+                          # depoly url-shortener on Kubernetes. (assignment 3.2)
+                          
+  url-shortener/          # Contain the common source that would be used in both docker and kubernetes  
+    api/                  # The source code of api-service, include Docker
+    authenenticator/      # The source code of authenticator-service, include Dockerfile
+    db/                   # The Dockerfile of database
+    
+```
+
+# Getting Started
 
 ## Docker
 
@@ -172,56 +191,63 @@ ACCESS_TOKEN_LIFESPAN=3600
   In fact, all of our the service deployment is managed through [Helm Charts](https://helm.sh). Therefore, more configurable value can be found in the `values.yaml` file in the helm charts of each services. For example, you can configure the number of replica of url-shortener pod in `url-shortner/deployment/kubernetes/ansible/roles/deploy-k8s-service/files/app-service/url-shortener/helm/url-shortener/values.yaml` file. The detail directory layout of our project is shown below.
 
   ```
-  url-shortener/                         # source code of URL Shortener service
+  url-shortener/
+    README.md
+    .github/                               # The github workflow action. Build and push                                                                # The docker image when commit.
+    
+    url-shortener/                         # Contain the common source that would 
+                                           # be used in both docker and kubernetes
+                                          
+    deployment/                            
+      docker/                              # Contain the script to deploy url-shortener 
+                                           # on Docker (assignment 3.1)
+      kubernetes/                          # Contain the Ansible script to deploy Kubernetes cluster and
+                                           # depoly url-shortener on Kubernetes. (assignment 3.2)
+        run.sh
+        taglist                  
+        ansible/
+          hosts                            # The inventory file for target machine
+          playbook.yaml
+          roles/
+            ansible-init/                  # Init connection between target machine and
+                                           # ansible node.
+            helm/                          # Install Helm on master node.
   
-  deployment/                            
-    docker/                              # deploy script for doployment on Docker
-    kubernetes/                          # deploy script for deployment on Kuberentes
-      run.sh
-      taglist                  
-      ansible/
-        hosts                            # inventory file for target machine
-        playbook.yaml
-        roles/
-          ansible-init/                  # init connection between target machine and
-                                         # ansible node.
-          helm/                          # install Helm on master node.
-          
-          docker/                        # install Docker Engine on all machines.
-          
-          k8s-install/                   # install kubeadm, kubelet, kubectl on all machines
-          
-          k8s-master-init/               # init master node
-          
-          k8s-worker-init/               # join k8s cluster
-          
-          deploy-k8s-service/            
-            tasks/
-            files/
-              app-services/              # contains the helm charts and deploy script of app-services
-                url-shortener/
-                  helm/                  # helm chart of url-shortener
-                    url-shortener/      
-                      charts/
-                      templates/
-                      Chart.yaml
-                      values.yaml        # configure more values in this file
-                  config.ini
-                  deploy.sh
-                  uninstall.sh
-              
-              infra-services/
-                calico/
-                  helm/                  # helm chart of calico
-                ingress-nginx/
-                  helm/                  # helm chart of calico
-                longhorn/
-                  helm/                  # helm chart of longhorn
-              
-              monitor-service/
-                k9s/
+            docker/                        # Install Docker Engine on all machines.
+  
+            k8s-install/                   # Install kubeadm, kubelet, kubectl on all machines
+  
+            k8s-master-init/               # Init master node
+  
+            k8s-worker-init/               # Join k8s cluster
+  
+            deploy-k8s-service/            # Deploy service on k8s
+              tasks/
+              files/
+                app-services/              # Contains the helm charts and deploy script of app-services
+                  url-shortener/
+                    helm/                  # helm chart of url-shortener
+                      url-shortener/      
+                        charts/
+                        templates/
+                        Chart.yaml
+                        values.yaml        # configure more values in this file
+                    config.ini
+                    deploy.sh
+                    uninstall.sh
+  
+                infra-services/
+                  calico/
+                    helm/                  # helm chart of calico
+                  ingress-nginx/
+                    helm/                  # helm chart of calico
+                  longhorn/
+                    helm/                  # helm chart of longhorn
+  
+                monitor-service/
+                  k9s/
   ```
-
+  
   
 
 # Reference
