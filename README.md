@@ -15,7 +15,7 @@ url-shortener/
     kubernetes/           # Contain the Ansible script to deploy Kubernetes cluster and
                           # depoly url-shortener on Kubernetes. (assignment 3.2).
                           
-  url-shortener/          # Contain the common source that would be used in both docker and kubernetes  
+  url-shortener/          # Contain the common source that would be used in both docker and kubernetes. 
     api/                  # The source code of api-service, including Dockerfile.
     authenenticator/      # The source code of authenticator-service, including Dockerfile.
     db/                   # The Dockerfile of database.
