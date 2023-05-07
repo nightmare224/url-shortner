@@ -1,0 +1,11 @@
+server {
+    listen 80;
+    server_name ${PROXY_SERVER_NAME};
+    location / {
+        proxy_pass http://${PROXY_SERVER_NAME}:${API_PORT};
+    }
+
+    location /users/ {
+        proxy_pass http://${PROXY_SERVER_NAME}:${AUTHENTICATOR_PORT};
+    }
+}
