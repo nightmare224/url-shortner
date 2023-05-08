@@ -54,5 +54,16 @@ services:
       db:
         condition: service_healthy
 
+  proxy:
+    container_name: proxy
+    build: ./src/proxy
+    environment:
+      PROXY_SERVER_NAME: ${PROXY_SERVER_NAME}
+      API_PORT: ${API_PORT}
+      AUTHENTICATOR_PORT: ${AUTHENTICATOR_PORT}
+    ports:
+      - "${PROXY_PORT}:${PROXY_PORT}"
+    restart: always
+
 volumes:
   urlshortner-data:
