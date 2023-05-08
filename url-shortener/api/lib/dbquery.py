@@ -1,6 +1,6 @@
 import os
 from sqlalchemy.sql import func
-from dbmodel import db, url_mapper, url_mapper_schema, url_user_mapper
+from dbmodel import db, UrlMapper, url_mapper_schema, UrlUserMapper
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from model.error import InternalServer
 from lib.shortener import get_next_unique_id
@@ -21,15 +21,15 @@ def create_short_url(full_url, user_id) -> dict:
     """
     next_unique_id = get_next_unique_id(full_url)
     # add url mapping
-    new_url = url_mapper(
+    new_url = UrlMapper(
         short_url_id=next_unique_id,
         full_url=full_url,
     )
     db.session.add(new_url)
     db.session.commit()
     # add user and url mapping
-    url_id, = db.session.query(url_mapper.url_id).filter_by(short_url_id=next_unique_id).first()
-    new_url_user = url_user_mapper(url_id=url_id, user_id=user_id)
+    url_id, = db.session.query(UrlMapper.url_id).filter_by(short_url_id=next_unique_id).first()
+    new_url_user = UrlUserMapper(url_id=url_id, user_id=user_id)
     db.session.add(new_url_user)
     db.session.commit()
 
@@ -37,7 +37,7 @@ def create_short_url(full_url, user_id) -> dict:
 
 
 def update_full_url(short_url_id, full_url):
-    url_map = url_mapper.query.filter_by(short_url_id=short_url_id).first()
+    url_map = UrlMapper.query.filter_by(short_url_id=short_url_id).first()
     if url_map is None:
         raise UnmappedInstanceError(f"No row found with short_url_id={short_url_id}")
     url_map.full_url = full_url
@@ -54,7 +54,7 @@ def delete_short_url(short_url_id) -> str:
     returns:
         short url id
     """
-    db.session.query(url_mapper).filter_by(short_url_id=short_url_id).delete()
+    db.session.query(UrlMapper).filter_by(short_url_id=short_url_id).delete()
     db.session.commit()
 
     return short_url_id
@@ -63,10 +63,10 @@ def delete_short_url(short_url_id) -> str:
 def is_full_url_not_found(full_url, user_id) -> bool:
     not_found = False
     count = (
-        db.session.query(func.count(url_user_mapper.url_id))
+        db.session.query(func.count(UrlUserMapper.url_id))
         .filter_by(user_id=user_id)
-        .join(url_mapper, url_user_mapper.url_id == url_mapper.url_id)
-        .filter(url_mapper.full_url == full_url)
+        .join(UrlMapper, UrlUserMapper.url_id == UrlMapper.url_id)
+        .filter(UrlMapper.full_url == full_url)
         .scalar()
     )
     if count < 1:
@@ -77,10 +77,10 @@ def is_full_url_not_found(full_url, user_id) -> bool:
 def is_short_url_id_not_found(short_url_id, user_id) -> bool:
     not_found = False
     count = (
-        db.session.query(func.count(url_user_mapper.url_id))
+        db.session.query(func.count(UrlUserMapper.url_id))
         .filter_by(user_id=user_id)
-        .join(url_mapper, url_user_mapper.url_id == url_mapper.url_id)
-        .filter(url_mapper.short_url_id == short_url_id)
+        .join(UrlMapper, UrlUserMapper.url_id == UrlMapper.url_id)
+        .filter(UrlMapper.short_url_id == short_url_id)
         .scalar()
     )
     if count < 1:
@@ -89,37 +89,37 @@ def is_short_url_id_not_found(short_url_id, user_id) -> bool:
 
 
 def query_url_mapping(*args, short_url_id=None, full_url=None, user_id=None):
-    statement = db.session.query(url_mapper.url_id)
+    statement = db.session.query(UrlMapper.url_id)
     if user_id is not None:
         statement = (
-            db.session.query(url_user_mapper.url_id)
+            db.session.query(UrlUserMapper.url_id)
             .filter_by(user_id=user_id)
-            .join(url_mapper, url_user_mapper.url_id == url_mapper.url_id)
+            .join(UrlUserMapper, UrlUserMapper.url_id == UrlMapper.url_id)
         )
 
     url_id = None
     if args:
         raise InternalServer("Provide short_url_id or full_url to get url_mapping")
     elif short_url_id:
-        url_id = statement.filter(url_mapper.short_url_id == short_url_id).scalar()
+        url_id = statement.filter(UrlMapper.short_url_id == short_url_id).scalar()
         if url_id is None:
             return None
             # raise InternalServer("short_url_id not found in database.")
     elif full_url:
-        url_id = statement.filter(url_mapper.full_url == full_url).scalar()
+        url_id = statement.filter(UrlMapper.full_url == full_url).scalar()
         if url_id is None:
             return None
             # raise InternalServer("short_url_id not found in database.")
 
     if url_id is not None:
-        url_map = url_mapper.query.get(url_id)
+        url_map = UrlMapper.query.get(url_id)
         result = url_mapper_schema.dump(url_map)
     # get all result if not provide variable
     else:
         result = []
         url_id_list = statement.all()
         for url_id in url_id_list:
-            url_map = url_mapper.query.get(url_id)
+            url_map = UrlMapper.query.get(url_id)
             result.append(url_mapper_schema.dump(url_map))
 
     return result

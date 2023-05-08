@@ -1,4 +1,4 @@
-from dbmodel import db, url_mapper
+from dbmodel import db, UrlMapper
 from uuid import uuid5, NAMESPACE_URL
 
 def base62_encode(url_id) -> str:
@@ -35,7 +35,7 @@ def get_next_unique_id(full_url) -> str:
     digit = 1
     init_id = base62_encode(uuid5(NAMESPACE_URL, full_url).int)
     final_id = get_final_id(init_id, digit)
-    result = db.session.query(url_mapper.short_url_id).all()
+    result = db.session.query(UrlMapper.short_url_id).all()
     id_set = set([id[0] for id in result])
     while final_id in id_set:
         digit += 1

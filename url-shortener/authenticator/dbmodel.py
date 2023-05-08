@@ -6,7 +6,7 @@ from datetime import datetime
 db = SQLAlchemy()
 
 # url shortner model class
-class user_info(db.Model):
+class UserInfo(db.Model):
     __tablename__ = "user_info"
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(256), unique=True)
@@ -18,7 +18,7 @@ class UserInfoSchema(Schema):
     username = fields.String()
     password = fields.String()
 
-class jwks(db.Model):
+class Jwks(db.Model):
     __tablename__ = "jwks"
     __table_args__ = {'extend_existing': True}
     kid = db.Column(db.Integer, primary_key=True, autoincrement=True)

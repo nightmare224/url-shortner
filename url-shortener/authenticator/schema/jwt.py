@@ -4,7 +4,7 @@ from base64 import urlsafe_b64encode,urlsafe_b64decode
 from Crypto.PublicKey import RSA
 from marshmallow import Schema, fields, post_dump, post_load
 from model.jwt import JWTHeader, JWTPayload, JWK
-from dbmodel import db, jwks
+from dbmodel import db, Jwks
 
 class JWTHeaderSchema(Schema):
     alg = fields.String()
@@ -51,13 +51,13 @@ class JWTSchema(Schema):
         )
         
         # read key
-        jwk = db.session.query(jwks).order_by(jwks.create_date.desc()).first()
+        jwk = db.session.query(Jwks).order_by(Jwks.create_date.desc()).first()
         n = int.from_bytes(urlsafe_b64decode(fill_b64_padding(jwk.n)), 'big')
         d = int.from_bytes(urlsafe_b64decode(fill_b64_padding(jwk.d)), 'big')
         # signature
         header_payload = f"{header_b64}.{payload_b64}".encode("utf-8")
-        hash = int.from_bytes(sha512(header_payload).digest(), byteorder='big')
-        signature = pow(hash, d, n)
+        hash_token = int.from_bytes(sha512(header_payload).digest(), byteorder='big')
+        signature = pow(hash_token, d, n)
         signature_binary = signature.to_bytes((signature.bit_length() + 7) // 8, 'big')
         signature_b64 = urlsafe_b64encode(signature_binary).decode("utf-8").replace("=", "")
 
