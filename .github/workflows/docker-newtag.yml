@@ -2,24 +2,31 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [master]
     tags:        
       - '*' 
-  pull_request:
-    branches: [master]
-  
-
 env:
   DOCKER_USER: ${{secrets.DOCKER_USER}}
   DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+  RELEASE_VERSION: ""
 
 jobs:
+
+  get-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Test
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
+  
   build-api:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: url-shortener/api
-
     steps:
       - uses: actions/checkout@v3
       - name: Docker Image for API
