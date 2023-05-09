@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker Image for API
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-api:${RELEASE_VERSION}
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-api:${{ env.RELEASE_VERSION }}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker image for authenticator
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:${RELEASE_VERSION}
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:${{ env.RELEASE_VERSION }}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
@@ -65,7 +65,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Docker image for DB
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-db:${RELEASE_VERSION} 
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-db:${{ env.RELEASE_VERSION }}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
