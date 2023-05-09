@@ -1,0 +1,62 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [master]
+    tags:        
+      - '*' 
+  pull_request:
+    branches: [master]
+  
+
+env:
+  DOCKER_USER: ${{secrets.DOCKER_USER}}
+  DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+
+jobs:
+  build-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: url-shortener/api
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Docker Image for API
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-api:${GITHUB_REF#refs/*/}
+      - name: Docker login
+        run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - name: Push image
+        run: docker push --all-tags $DOCKER_USER/url-shortener-api
+
+
+  build-authenticator:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: url-shortener/authenticator
+    steps:
+      - uses: actions/checkout@v3
+      - name: Docker image for authenticator
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:${GITHUB_REF#refs/*/}
+      - name: Docker login
+        run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - name: Push image
+        run: docker push --all-tags $DOCKER_USER/url-shortener-authenticator
+
+
+
+  build-db:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: url-shortener/db
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Docker image for DB
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-db:${GITHUB_REF#refs/*/} 
+      - name: Docker login
+        run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      - name: Push image
+        run: docker push --all-tags $DOCKER_USER/url-shortener-db
