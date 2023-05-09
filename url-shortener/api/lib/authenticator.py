@@ -5,7 +5,6 @@ from Crypto.PublicKey import RSA
 from model.error import Forbidden
 from base64 import urlsafe_b64decode
 from time import time
-from dbmodel import db, Jwks
 import json
 import requests
 import os
@@ -35,9 +34,9 @@ def verify_token(token = None):
 
     # get public key from authenticator well know endpoint
     resp = requests.get(f'http://{os.environ.get("AUTHENTICATOR_ENDPOINT")}:{os.environ.get("AUTHENTICATOR_PORT")}/auth/.well-known/configuration')
-    Jwks = resp.json()
+    jwks = resp.json()
     jwk = None
-    for data in Jwks:
+    for data in jwks:
         if header["kid"] == data["kid"]:
             jwk = data
             break

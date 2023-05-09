@@ -94,7 +94,7 @@ def query_url_mapping(*args, short_url_id=None, full_url=None, user_id=None):
         statement = (
             db.session.query(UrlUserMapper.url_id)
             .filter_by(user_id=user_id)
-            .join(UrlUserMapper, UrlUserMapper.url_id == UrlMapper.url_id)
+            .join(UrlMapper, UrlUserMapper.url_id == UrlMapper.url_id)
         )
 
     url_id = None
