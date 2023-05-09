@@ -59,6 +59,7 @@ services:
     build: ./proxy
     environment:
       PROXY_SERVER_NAME: ${PROXY_SERVER_NAME}
+      PROXY_PORT: ${PROXY_PORT}
       API_PORT: ${API_PORT}
       AUTHENTICATOR_PORT: ${AUTHENTICATOR_PORT}
     ports:

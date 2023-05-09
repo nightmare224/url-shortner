@@ -2,14 +2,14 @@ server {
     listen 80;
     server_name ${PROXY_SERVER_NAME};
     location / {
-        proxy_pass http://${PROXY_SERVER_NAME}:${API_PORT};
+        proxy_pass http://api-service:${API_PORT};
     }
 
     location ~ /users($|/) {
-        proxy_pass http://${PROXY_SERVER_NAME}:${AUTHENTICATOR_PORT};
+        proxy_pass http://authenticator-service:${AUTHENTICATOR_PORT};
     }
 
     location ~ /auth($|/) {
-        proxy_pass http://${PROXY_SERVER_NAME}:${AUTHENTICATOR_PORT};
+        proxy_pass http://authenticator-service:${AUTHENTICATOR_PORT};
     }
 }
