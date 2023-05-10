@@ -59,5 +59,20 @@ jobs:
       - name: Push image
         run: docker push --all-tags $DOCKER_USER/url-shortener-db
 
+  nginx-proxy:
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: url-shortener/proxy
+
+      steps:
+        - uses: actions/checkout@v3
+        - name: Docker image for DB
+          run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-proxy:${GITHUB_SHA::7} --tag $DOCKER_USER/url-shortener-proxy:latest
+        - name: Docker login
+          run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+        - name: Push image
+          run: docker push --all-tags $DOCKER_USER/url-shortener-proxy
+
 
 
