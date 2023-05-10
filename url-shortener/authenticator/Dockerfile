@@ -13,5 +13,5 @@ RUN pip install --upgrade pip
 
 RUN pip --no-cache-dir install -r requirements.txt
 
-EXPOSE ${API_PORT}
+EXPOSE ${AUTHENTICATOR_PORT}
 CMD ["gunicorn", "-c", "gunicorn.conf.py", "app:app"]
