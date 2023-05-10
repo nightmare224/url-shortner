@@ -10,8 +10,6 @@ services:
       PGDATABASE: ${DATABASE_NAME}
       PGUSER: ${DATABASE_USER}
       PGPASSWORD: ${DATABASE_PASSWORD}
-    ports:
-      - "${DATABASE_PORT}:${DATABASE_PORT}"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready --timeout=5"]
       interval: 10s
@@ -31,8 +29,6 @@ services:
       AUTHENTICATOR_PORT: ${AUTHENTICATOR_PORT}
       AUTHENTICATOR_DEBUG: ${AUTHENTICATOR_DEBUG}
       ACCESS_TOKEN_LIFESPAN: ${ACCESS_TOKEN_LIFESPAN}
-    ports:
-      - "${AUTHENTICATOR_PORT}:${AUTHENTICATOR_PORT}"
     depends_on:
       db:
         condition: service_healthy
@@ -48,8 +44,6 @@ services:
       AUTHENTICATOR_PORT: ${AUTHENTICATOR_PORT}
       AUTHENTICATOR_ENDPOINT: ${AUTHENTICATOR_ENDPOINT}
       BASE_URL_FOR_SHORT_URL: ${BASE_URL_FOR_SHORT_URL}
-    ports:
-      - "${API_PORT}:${API_PORT}"
     depends_on:
       db:
         condition: service_healthy
