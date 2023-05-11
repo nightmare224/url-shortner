@@ -33,11 +33,11 @@ jobs:
     needs: get-tag
     steps:
       - uses: actions/checkout@v3
-      - env:
-          RELEASE_VERSION: ${{ needs.get-tag.outputs.RELEASE_VERSION }}
-        run: echo $RELEASE_VERSION
+#       - env:
+#           RELEASE_VERSION: ${{ needs.get-tag.outputs.RELEASE_VERSION }}
+#         run: echo $RELEASE_VERSION
       - name: Docker Image for API
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-api:$RELEASE_VERSION
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-api:${{ needs.get-tag.outputs.RELEASE_VERSION }}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
@@ -52,11 +52,11 @@ jobs:
         working-directory: url-shortener/authenticator
     steps:
       - uses: actions/checkout@v3
-      - env:
-          RELEASE_VERSION: ${{ needs.get-tag.outputs.RELEASE_VERSION }}
-        run: echo $RELEASE_VERSION
+#       - env:
+#           RELEASE_VERSION: ${{ needs.get-tag.outputs.RELEASE_VERSION }}
+#         run: echo $RELEASE_VERSION
       - name: Docker image for authenticator
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:$RELEASE_VERSION
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-authenticator:${{ needs.get-tag.outputs.RELEASE_VERSION }}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
@@ -73,11 +73,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - env:
-          RELEASE_VERSION: ${{ needs.get-tag.outputs.RELEASE_VERSION }}
-        run: echo $RELEASE_VERSION
+#       - env:
+#           RELEASE_VERSION: ${{ needs.get-tag.outputs.RELEASE_VERSION }}
+#         run: echo $RELEASE_VERSION
       - name: Docker image for DB
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-db:$RELEASE_VERSION
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-db:${{ needs.get-tag.outputs.RELEASE_VERSION }}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
@@ -92,11 +92,11 @@ jobs:
         working-directory: url-shortener/proxy
     steps:
       - uses: actions/checkout@v3
-      - env:
-          RELEASE_VERSION: ${{ needs.get-tag.outputs.RELEASE_VERSION }}
-        run: echo $RELEASE_VERSION
+#       - env:
+#           RELEASE_VERSION: ${{ needs.get-tag.outputs.RELEASE_VERSION }}
+#         run: echo $RELEASE_VERSION
       - name: Docker image for DB
-        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-proxy:$RELEASE_VERSION
+        run: docker build . --file Dockerfile --tag $DOCKER_USER/url-shortener-proxy:${{ needs.get-tag.outputs.RELEASE_VERSION }}
       - name: Docker login
         run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push image
