@@ -193,7 +193,8 @@ ACCESS_TOKEN_LIFESPAN=3600
   ```
   url-shortener/
     README.md
-    .github/                               # The github workflow action. Build and push                                                                # The docker image when commit.
+    .github/                               # The github workflow action. Build and push 
+                                           # the docker image when commit.
     
     url-shortener/                         # Contain the common source that would 
                                            # be used in both docker and kubernetes.
@@ -240,7 +241,7 @@ ACCESS_TOKEN_LIFESPAN=3600
                   calico/
                     helm/                  # Helm chart of calico.
                   ingress-nginx/
-                    helm/                  # Helm chart of calico.
+                    helm/                  # Helm chart of ingress-nginx.
                   longhorn/
                     helm/                  # Helm chart of longhorn.
   
